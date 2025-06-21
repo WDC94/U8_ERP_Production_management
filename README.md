@@ -2,7 +2,7 @@
 本项目主要涉及U8 ERP系统MRP计算、根据计算结果写入请购单、模具管理等功能
 
 # 一、后端主目录结构
- project_root/
+ project_root/  
  ├─ app.py                  # 主程序入口  
  ├─ config.py               # 配置文件（数据库/账套参数）  
  ├─ requirements.txt        # 依赖库清单  
