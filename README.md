@@ -1,34 +1,34 @@
 # U8-ERP-生产管理辅助系统
 本项目主要涉及U8 ERP系统MRP计算、根据计算结果写入请购单、模具管理等功能
 
-一、后端主目录结构
-project_root/
-├─ app.py                  # 主程序入口
-├─ config.py               # 配置文件（数据库/账套参数）
-├─ requirements.txt        # 依赖库清单
-├─ /modules/               # 业务核心模块
-│    ├─ user.py            # 用户/权限/操作日志
-│    ├─ sync.py            # U8数据同步与只读接口
-│    ├─ mrp.py             # 生产计划/MRP/BOM运算
-│    ├─ purchase.py        # 采购请购单处理
-│    ├─ mold.py            # 模具管理
-│    └─ utils.py           # 工具/日志/参数/异常
-├─ /db/
-│    ├─ models.py          # ORM模型定义（表结构对应）
-│    └─ session.py         # 数据库会话管理
-├─ /api/                   # RESTful接口蓝图
-│    ├─ user_api.py   
-│    ├─ sync_api.py
-│    ├─ mrp_api.py   
-│    ├─ purchase_api.py  
-│    └─ mold_api.py
-├─ /jobs/                  # 定时任务脚本（同步/运算等）
-├─ /logs/                  # 各类操作/业务/异常日志
-├─ /templates/             # 前端模板
-├─ /static/                # 静态资源
-└─ /tests/                 # 自动化测试
+# 一、后端主目录结构
+ project_root/
+ ├─ app.py                  # 主程序入口
+ ├─ config.py               # 配置文件（数据库/账套参数）
+ ├─ requirements.txt        # 依赖库清单
+ ├─ /modules/               # 业务核心模块
+ │    ├─ user.py            # 用户/权限/操作日志
+ │    ├─ sync.py            # U8数据同步与只读接口
+ │    ├─ mrp.py             # 生产计划/MRP/BOM运算
+ │    ├─ purchase.py        # 采购请购单处理
+ │    ├─ mold.py            # 模具管理
+ │    └─ utils.py           # 工具/日志/参数/异常
+ ├─ /db/
+ │    ├─ models.py          # ORM模型定义（表结构对应）
+ │    └─ session.py         # 数据库会话管理
+ ├─ /api/                   # RESTful接口蓝图
+ │    ├─ user_api.py   
+ │    ├─ sync_api.py
+ │    ├─ mrp_api.py   
+ │    ├─ purchase_api.py  
+ │    └─ mold_api.py
+ ├─ /jobs/                  # 定时任务脚本（同步/运算等）
+ ├─ /logs/                  # 各类操作/业务/异常日志
+ ├─ /templates/             # 前端模板
+ ├─ /static/                # 静态资源
+ └─ /tests/                 # 自动化测试
 
-二、主要模块说明与分工
+# 二、主要模块说明与分工
 1. modules/
 user.py：注册、登录、权限判定、角色分配、用户操作日志、账号启用/禁用。
 sync.py：U8基础数据的读取（物料/BOM/供应商/库存），只读接口，支持定时/手动同步。
