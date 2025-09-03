@@ -169,11 +169,12 @@ class DataSettingService:
                 insert_cols.append(created_col); values.append(datetime.now())
 
             placeholders = ", ".join(["?"] * len(insert_cols))
-            sql = f"INSERT INTO {self.USER_TABLE} ({', '.join(insert_cols)}) VALUES ({placeholders}); SELECT SCOPE_IDENTITY();"
+            sql = f"INSERT INTO {self.USER_TABLE} ({', '.join(insert_cols)}) VALUES ({placeholders})"
             cur.execute(sql, values)
+            conn.commit()
+            cur.execute("SELECT SCOPE_IDENTITY()")
             row = cur.fetchone()
             new_id = int(row[0]) if row and row[0] is not None else 0
-            conn.commit()
             return new_id
 
     def update_user(self, user_id: int, data: Dict[str, Any]) -> None:
@@ -257,11 +258,12 @@ class DataSettingService:
             name_col = self._pick_col(cols, self.REFUND_NAME_CAND)
             if not name_col:
                 raise RuntimeError("Mujufanhuan 表缺少名称列")
-            sql = f"INSERT INTO {self.REFUND_TABLE} ({name_col}) VALUES (?); SELECT SCOPE_IDENTITY();"
+            sql = f"INSERT INTO {self.REFUND_TABLE} ({name_col}) VALUES (?)"
             cur.execute(sql, (name.strip(),))
+            conn.commit()
+            cur.execute("SELECT SCOPE_IDENTITY()")
             row = cur.fetchone()
             new_id = int(row[0]) if row and row[0] is not None else 0
-            conn.commit()
             return new_id
 
     def update_refund_method(self, rid: int, name: str) -> None:
@@ -308,11 +310,12 @@ class DataSettingService:
             name_col = self._pick_col(cols, self.PROC_NAME_CAND)
             if not name_col:
                 raise RuntimeError("MJGYi 表缺少名称列")
-            sql = f"INSERT INTO {self.PROC_TABLE} ({name_col}) VALUES (?); SELECT SCOPE_IDENTITY();"
+            sql = f"INSERT INTO {self.PROC_TABLE} ({name_col}) VALUES (?)"
             cur.execute(sql, (name.strip(),))
+            conn.commit()
+            cur.execute("SELECT SCOPE_IDENTITY()")
             row = cur.fetchone()
             new_id = int(row[0]) if row and row[0] is not None else 0
-            conn.commit()
             return new_id
 
     def update_process_method(self, pid: int, name: str) -> None:
