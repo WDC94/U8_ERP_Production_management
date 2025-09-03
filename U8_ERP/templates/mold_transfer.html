@@ -69,10 +69,6 @@
               <datalist id="mold-options"></datalist>
             </div>
             <div>
-              <label class="block text-sm font-semibold mb-1">物料编码</label>
-              <input type="text" id="material-code" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100" readonly>
-            </div>
-            <div>
               <label class="block text-sm font-semibold mb-1">产品名称</label>
               <input type="text" id="product-name" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100" readonly>
             </div>
@@ -116,7 +112,6 @@
           <thead class="bg-neutral">
             <tr class="text-left border-b">
               <th class="py-2 px-4">模具ID</th>
-              <th class="py-2 px-4">物料编码</th>
               <th class="py-2 px-4">产品名称</th>
               <th class="py-2 px-4">调拨数量</th>
               <th class="py-2 px-4">调拨日期</th>
@@ -175,8 +170,19 @@
     function onMoldInput(val) {
       searchMold(val);
       const mold = moldSearchCache.find(m => m.mold_id == val);
-      document.getElementById('material-code').value = mold ? (m.material_code || '') : '';
       document.getElementById('product-name').value = mold ? (m.product_name || '') : '';
+      if (mold) {
+        document.getElementById('from-supplier').value = mold.casting_supplier || '';
+        fetch('/api/mold/latest-transfer/' + encodeURIComponent(mold.mold_id))
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.latest_to_supplier) {
+              document.getElementById('from-supplier').value = data.latest_to_supplier;
+            }
+          });
+      } else {
+        document.getElementById('from-supplier').value = '';
+      }
     }
 
     // --- 供应商模糊查询并下拉展示 ---
@@ -204,7 +210,6 @@
     document.getElementById('mold-transfer-form').addEventListener('submit', function (e) {
       e.preventDefault();
       const moldId = document.getElementById('mold-id').value;
-      const material = document.getElementById('material-code').value;
       const product = document.getElementById('product-name').value;
       const quantity = document.getElementById('quantity').value;
       const transferDate = document.getElementById('transfer-date').value;
@@ -215,7 +220,6 @@
       newRow.classList.add('border-b');
       newRow.innerHTML = `
         <td class="py-2 px-4">${moldId}</td>
-        <td class="py-2 px-4">${material}</td>
         <td class="py-2 px-4">${product}</td>
         <td class="py-2 px-4">${quantity}</td>
         <td class="py-2 px-4">${transferDate}</td>
@@ -226,7 +230,6 @@
       `;
       document.getElementById('mold-transfer-list').appendChild(newRow);
       this.reset();
-      document.getElementById('material-code').value = '';
       document.getElementById('product-name').value = '';
     });
   </script>
