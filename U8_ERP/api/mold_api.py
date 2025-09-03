@@ -207,7 +207,12 @@ def mold_search():
     kw = (request.args.get('kw') or '').strip().lower()
     rows = mold.list_mold_period_v2()
     if kw:
-        rows = [r for r in rows if kw in (r.get('product_name','') or '').lower()]
+        rows = [
+            r
+            for r in rows
+            if kw in str(r.get('mold_id', '')).lower()
+               or kw in (r.get('product_name', '') or '').lower()
+        ]
     # 精简返回
     brief = [{'mold_id': r['mold_id'], 'product_name': r['product_name']} for r in rows]
     return jsonify(brief)
