@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>模具调拨登记 - 澳升泵业平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0088cc',
+            secondary: '#006400',
+            neutral: '#f9f9f9',
+            'neutral-dark': '#666666',
+          },
+          fontFamily: {
+            sans: ['Arial', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style>
+    input[list]::-webkit-calendar-picker-indicator { display: none !important; }
+  </style>
+</head>
+<body class="bg-neutral min-h-screen text-gray-800 font-sans">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white py-4 shadow-md fixed top-0 left-0 right-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-secondary text-2xl font-bold mr-2">澳升泵业</span>
+        <span class="text-primary text-lg font-semibold">生产管理辅助平台</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="text-sm text-gray-700">欢迎，<span class="font-semibold" id="user-name">admin</span></span>
+        <button onclick="logout()" class="text-sm text-white bg-primary px-4 py-2 rounded hover:bg-blue-700 transition">
+          <i class="fa fa-sign-out-alt mr-1"></i> 退出登录
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex pt-20">
+    <aside class="w-60 bg-[#808080] h-screen fixed top-20 left-0 bottom-0 z-0 text-white">
+      <nav class="flex flex-col py-6 px-4 space-y-3">
+        <a href="/user_home.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition"><i class="fa fa-home mr-2"></i> 主页</a>
+        <a href="/sync_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition"><i class="fa fa-sync-alt mr-2"></i> 数据同步</a>
+        <a href="/mrp_run.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition"><i class="fa fa-cogs mr-2"></i> MRP运算</a>
+        <a href="/purchase_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition"><i class="fa fa-file-alt mr-2"></i> 生成请购单</a>
+        <a href="/mold_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition"><i class="fa fa-tools mr-2"></i> 模具管理</a>
+        <a href="/report_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition"><i class="fa fa-chart-line mr-2"></i> 数据报表</a>
+      </nav>
+    </aside>
+
+    <main class="ml-60 flex-1 p-6">
+      <h2 class="text-2xl font-bold mb-6">模具调拨登记</h2>
+
+      <!-- 表单区域，两行四列 -->
+      <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+        <form id="mold-transfer-form" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-semibold mb-1">模具ID</label>
+              <input list="mold-options" id="mold-id" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded" required oninput="onMoldInput(this.value)">
+              <datalist id="mold-options"></datalist>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">物料编码</label>
+              <input type="text" id="material-code" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100" readonly>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">产品名称</label>
+              <input type="text" id="product-name" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100" readonly>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">调拨数量</label>
+              <input type="number" id="quantity" class="w-full px-3 py-2 border border-gray-300 rounded" required>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-semibold mb-1">调拨日期</label>
+              <input type="date" id="transfer-date" class="w-full px-3 py-2 border border-gray-300 rounded" required>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">调出供应商</label>
+              <input list="from-supplier-options" id="from-supplier" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded" required oninput="onSupplierInput(this.value, 'from-supplier-options')">
+              <datalist id="from-supplier-options"></datalist>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">调入供应商</label>
+              <input list="to-supplier-options" id="to-supplier" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded" required oninput="onSupplierInput(this.value, 'to-supplier-options')">
+              <datalist id="to-supplier-options"></datalist>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">备注</label>
+              <input type="text" id="note" class="w-full px-3 py-2 border border-gray-300 rounded">
+            </div>
+          </div>
+          <div class="flex justify-end mt-4">
+            <button type="submit" class="bg-primary text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition">
+              提交调拨
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 调拨历史表格 -->
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold mb-4 text-primary">已登记模具调拨</h3>
+        <table class="min-w-full text-sm border border-gray-200">
+          <thead class="bg-neutral">
+            <tr class="text-left border-b">
+              <th class="py-2 px-4">模具ID</th>
+              <th class="py-2 px-4">物料编码</th>
+              <th class="py-2 px-4">产品名称</th>
+              <th class="py-2 px-4">调拨数量</th>
+              <th class="py-2 px-4">调拨日期</th>
+              <th class="py-2 px-4">调出供应商</th>
+              <th class="py-2 px-4">调入供应商</th>
+              <th class="py-2 px-4">备注</th>
+              <th class="py-2 px-4">操作</th>
+            </tr>
+          </thead>
+          <tbody id="mold-transfer-list" class="text-gray-700">
+            <!-- JS填充 -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 用户名展示
+    document.getElementById('user-name').innerText =
+      localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).username : 'admin';
+
+    function logout() {
+      alert('您已退出登录');
+      window.location.href = '/login';
+    }
+
+    // 防抖工具
+    function debounce(fn, wait) {
+      let timer = null;
+      return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), wait);
+      };
+    }
+
+    // --- 模具模糊查询并下拉展示 ---
+    let moldSearchCache = [];
+    const searchMold = debounce(function (kw) {
+      if (!kw) return;
+      fetch('/api/mold/search?kw=' + encodeURIComponent(kw))
+        .then(res => res.json())
+        .then(list => {
+          moldSearchCache = Array.isArray(list) ? list : [];
+          const options = document.getElementById('mold-options');
+          options.innerHTML = '';
+          moldSearchCache.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.mold_id;
+            opt.label = m.product_name ? m.product_name : '';
+            options.appendChild(opt);
+          });
+        });
+    }, 300);
+
+    function onMoldInput(val) {
+      searchMold(val);
+      const mold = moldSearchCache.find(m => m.mold_id == val);
+      document.getElementById('material-code').value = mold ? (m.material_code || '') : '';
+      document.getElementById('product-name').value = mold ? (m.product_name || '') : '';
+    }
+
+    // --- 供应商模糊查询并下拉展示 ---
+    function searchSupplier(kw, listId) {
+      if (!kw) return;
+      fetch('/api/mold/supplier/search?kw=' + encodeURIComponent(kw))
+        .then(res => res.json())
+        .then(list => {
+          const options = document.getElementById(listId);
+          options.innerHTML = '';
+          (Array.isArray(list) ? list : []).forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.supplier_name || s.name || '';
+            options.appendChild(opt);
+          });
+        });
+    }
+    const debounceSupplier = debounce(searchSupplier, 300);
+
+    function onSupplierInput(val, listId) {
+      debounceSupplier(val, listId);
+    }
+
+    // 提交后插入到表格（模拟前端渲染）
+    document.getElementById('mold-transfer-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const moldId = document.getElementById('mold-id').value;
+      const material = document.getElementById('material-code').value;
+      const product = document.getElementById('product-name').value;
+      const quantity = document.getElementById('quantity').value;
+      const transferDate = document.getElementById('transfer-date').value;
+      const fromSupplier = document.getElementById('from-supplier').value;
+      const toSupplier = document.getElementById('to-supplier').value;
+      const note = document.getElementById('note').value;
+      const newRow = document.createElement('tr');
+      newRow.classList.add('border-b');
+      newRow.innerHTML = `
+        <td class="py-2 px-4">${moldId}</td>
+        <td class="py-2 px-4">${material}</td>
+        <td class="py-2 px-4">${product}</td>
+        <td class="py-2 px-4">${quantity}</td>
+        <td class="py-2 px-4">${transferDate}</td>
+        <td class="py-2 px-4">${fromSupplier}</td>
+        <td class="py-2 px-4">${toSupplier}</td>
+        <td class="py-2 px-4">${note}</td>
+        <td class="py-2 px-4 text-blue-600 cursor-pointer">编辑</td>
+      `;
+      document.getElementById('mold-transfer-list').appendChild(newRow);
+      this.reset();
+      document.getElementById('material-code').value = '';
+      document.getElementById('product-name').value = '';
+    });
+  </script>
+</body>
+</html>

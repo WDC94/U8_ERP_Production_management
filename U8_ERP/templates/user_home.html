@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>用户主页 - 澳升泵业平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0088cc',
+            secondary: '#006400',
+            neutral: '#f9f9f9',
+            'neutral-dark': '#666666',
+          },
+          fontFamily: {
+            sans: ['Arial', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+</head>
+<body class="bg-neutral min-h-screen text-gray-800 font-sans">
+
+  <!-- 顶部导航栏 -->
+  <header class="bg-white py-4 shadow-md fixed top-0 left-0 right-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-secondary text-2xl font-bold mr-2">澳升泵业</span>
+        <span class="text-primary text-lg font-semibold">生产管理辅助平台</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="text-sm text-gray-700">欢迎，<span class="font-semibold">{{ username }}</span></span>
+        <button onclick="logout()" class="text-sm text-white bg-primary px-4 py-2 rounded hover:bg-blue-700 transition">
+          <i class="fa fa-sign-out-alt mr-1"></i> 退出登录
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 页面主体 -->
+  <div class="flex pt-20">
+    <!-- 左侧菜单栏 -->
+    <aside class="w-60 bg-[#808080] h-screen fixed top-20 left-0 bottom-0 z-0 text-white">
+      <nav class="flex flex-col py-6 px-4 space-y-3">
+        <a href="/user_home.html" class="flex items-center px-3 py-2 rounded bg-gray-700">
+          <i class="fa fa-home mr-2"></i> 主页
+        </a>
+        <a href="/sync_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-sync-alt mr-2"></i> 数据同步
+        </a>
+        <a href="/mrp_run.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-cogs mr-2"></i> MRP运算
+        </a>
+        <a href="/purchase_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-file-alt mr-2"></i> 生成请购单
+        </a>
+        <a href="/mold_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-tools mr-2"></i> 模具管理
+        </a>
+        <a href="/analysis_report.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-chart-line mr-2"></i> 数据报表
+        </a>
+        <!-- 新增：数据设置 -->
+        <a href="/data_settings.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-sliders-h mr-2"></i> 数据设置
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主体内容 -->
+    <main class="ml-60 flex-1 p-6">
+      <h2 class="text-2xl font-bold mb-6">欢迎使用 👋</h2>
+
+      <!-- 功能模块 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-xl transition cursor-pointer"
+          onclick="location.href='/sync_main.html'">
+          <h3 class="text-lg font-semibold mb-2 text-primary"><i class="fa fa-sync-alt mr-2"></i> U8数据同步</h3>
+          <p class="text-sm text-gray-600">同步物料、BOM、供应商、库存等主数据</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-xl transition cursor-pointer"
+          onclick="location.href='/mrp_run.html'">
+          <h3 class="text-lg font-semibold mb-2 text-primary"><i class="fa fa-cogs mr-2"></i> MRP运算</h3>
+          <p class="text-sm text-gray-600">按BOM结构与库存展望，进行需求计算</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-xl transition cursor-pointer"
+          onclick="location.href='/purchase_main.html'">
+          <h3 class="text-lg font-semibold mb-2 text-primary"><i class="fa fa-file-alt mr-2"></i> 生成请购单</h3>
+          <p class="text-sm text-gray-600">按MRP结果在U8系统生成采购请购单</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-xl transition cursor-pointer"
+          onclick="location.href='/mold_main.html'">
+          <h3 class="text-lg font-semibold mb-2 text-primary"><i class="fa fa-tools mr-2"></i> 模具管理</h3>
+          <p class="text-sm text-gray-600">登记模具台账、模具费用管理、模具调拨管理</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-xl transition cursor-pointer"
+          onclick="location.href='/analysis_report.html'">
+          <h3 class="text-lg font-semibold mb-2 text-primary"><i class="fa fa-chart-line mr-2"></i> 数据报表</h3>
+          <p class="text-sm text-gray-600">查看MRP计算过程、请购单生成情况、生产库存周转情况、模具调拨记录等报表</p>
+        </div>
+      </div>
+
+      <!-- 月度报表 -->
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold mb-4 text-primary">📊 月度汇总报表</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border border-gray-300 text-center">
+            <thead class="bg-neutral text-gray-700 font-medium">
+              <tr>
+                <th class="py-2 px-2">月份</th>
+                <th class="py-2 px-2">接单台数</th>
+                <th class="py-2 px-2 bg-yellow-200">接单金额（万元）</th>
+                <th class="py-2 px-2">生产入库台数</th>
+                <th class="py-2 px-2">采购入库台数</th>
+                <th class="py-2 px-2">发货台数</th>
+                <th class="py-2 px-2 bg-yellow-200">发货金额（万元）</th>
+                <th class="py-2 px-2">月末成品库存</th>
+                <th class="py-2 px-2">月末电机库存</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-800">
+              <tr class="border-t"><td>1</td><td>5053</td><td class="bg-yellow-100">1310.28</td><td>6587</td><td>319</td><td>6110</td><td class="bg-yellow-100">1572.57</td><td>0</td><td>0</td></tr>
+              <tr class="border-t"><td>2</td><td>12393</td><td class="bg-yellow-100">2690.27</td><td>7071</td><td>408</td><td>8093</td><td class="bg-yellow-100">1829.36</td><td>0</td><td>0</td></tr>
+              <tr class="border-t"><td>3</td><td>12009</td><td class="bg-yellow-100">2859.61</td><td>13125</td><td>544</td><td>13097</td><td class="bg-yellow-100">2708.78</td><td>0</td><td>0</td></tr>
+              <tr class="border-t"><td>4</td><td>10917</td><td class="bg-yellow-100">2849.88</td><td>12989</td><td>539</td><td>12137</td><td class="bg-yellow-100">3092.98</td><td>0</td><td>0</td></tr>
+              <tr class="border-t"><td>5</td><td>10890</td><td class="bg-yellow-100">2769.67</td><td>10238</td><td>619</td><td>11688</td><td class="bg-yellow-100">2957.38</td><td>0</td><td>0</td></tr>
+              <tr class="border-t"><td>6</td><td>11503</td><td class="bg-yellow-100">3151.05</td><td>11060</td><td>644</td><td>10628</td><td class="bg-yellow-100">2798.54</td><td>0</td><td>0</td></tr>
+              <tr class="border-t"><td>7</td><td>4078</td><td class="bg-yellow-100">1080.12</td><td>4084</td><td>179</td><td>4184</td><td class="bg-yellow-100">1148.41</td><td>0</td><td>0</td></tr>
+              <tr class="border-t"><td>8</td><td colspan="8">待统计</td></tr>
+              <tr class="border-t"><td>9</td><td colspan="8">待统计</td></tr>
+              <tr class="border-t"><td>10</td><td colspan="8">待统计</td></tr>
+              <tr class="border-t"><td>11</td><td colspan="8">待统计</td></tr>
+              <tr class="border-t"><td>12</td><td colspan="8">待统计</td></tr>
+              <tr class="font-bold border-t bg-gray-100">
+                <td>总计</td><td>66873</td><td class="bg-yellow-100">16710.88</td><td>65154</td><td>3252</td><td>65937</td><td class="bg-yellow-100">16108.02</td><td>/</td><td>/</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function logout() {
+      alert('您已退出登录');
+      window.location.href = '/login';
+    }
+  </script>
+</body>
+</html>

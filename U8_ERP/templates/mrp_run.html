@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MRP运算参数 - 澳升泵业平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0088cc',
+            secondary: '#006400',
+            neutral: '#f9f9f9',
+            'neutral-dark': '#666666',
+          },
+          fontFamily: {
+            sans: ['Arial', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+</head>
+<body class="bg-neutral min-h-screen text-gray-800 font-sans">
+
+  <!-- 顶部导航栏 -->
+  <header class="bg-white py-4 shadow-md fixed top-0 left-0 right-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-secondary text-2xl font-bold mr-2">澳升泵业</span>
+        <span class="text-primary text-lg font-semibold">生产管理辅助平台</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="text-sm text-gray-700">欢迎，<span class="font-semibold">{{ username }}</span></span>
+        <button onclick="logout()" class="text-sm text-white bg-primary px-4 py-2 rounded hover:bg-blue-700 transition">
+          <i class="fa fa-sign-out-alt mr-1"></i> 退出登录
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 页面主体 -->
+  <div class="flex pt-20">
+    <!-- 左侧菜单栏 -->
+    <aside class="w-60 bg-[#808080] h-screen fixed top-20 left-0 bottom-0 z-0 text-white">
+      <nav class="flex flex-col py-6 px-4 space-y-3">
+        <a href="/user_home.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-home mr-2"></i> 主页
+        </a>
+        <a href="/sync_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-sync-alt mr-2"></i> 数据同步
+        </a>
+        <a href="/mrp_run.html" class="flex items-center px-3 py-2 rounded bg-gray-700">
+          <i class="fa fa-cogs mr-2"></i> MRP运算
+        </a>
+        <a href="/purchase_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-file-alt mr-2"></i> 生成请购单
+        </a>
+        <a href="/mold_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-tools mr-2"></i> 模具管理
+        </a>
+        <a href="/report_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-chart-line mr-2"></i> 数据报表
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="ml-60 flex-1 p-6">
+      <h2 class="text-2xl font-bold mb-6">MRP运算参数</h2>
+
+      <div class="bg-white p-6 rounded-xl shadow-md max-w-4xl">
+        <form id="mrp-form" class="space-y-6">
+          <div>
+            <label class="block text-gray-700 font-medium mb-2" for="start_date">开始日期（含）</label>
+            <input type="date" id="start_date" name="start_date" required class="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all">
+          </div>
+          <div>
+            <label class="block text-gray-700 font-medium mb-2" for="end_date">结束日期（含）</label>
+            <input type="date" id="end_date" name="end_date" required class="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all">
+          </div>
+
+          <div>
+            <label class="block text-gray-700 font-medium mb-2">仓库代码（可多选，也可自定义）</label>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-2 mb-3" id="warehouse-list">
+              <label><input type="checkbox" value="0101" class="mr-2">0101 装配原材料库</label>
+              <label><input type="checkbox" value="0102" class="mr-2">0102 冲压原材料库</label>
+              <label><input type="checkbox" value="0103" class="mr-2">0103 装配包材库</label>
+              <label><input type="checkbox" value="0104" class="mr-2">0104 原材料周转仓</label>
+              <label><input type="checkbox" value="0201" class="mr-2">0201 装配线边库</label>
+              <label><input type="checkbox" value="0202" class="mr-2">0202 冲压线边库</label>
+              <label><input type="checkbox" value="0301" class="mr-2">0301 装配半成品库</label>
+              <label><input type="checkbox" value="0302" class="mr-2">0302 半成品库（管道泵）</label>
+              <label><input type="checkbox" value="0401" class="mr-2">0401 水泵成品库</label>
+              <label><input type="checkbox" value="0501" class="mr-2">0501 电器仓</label>
+              <label><input type="checkbox" value="0801" class="mr-2">0801 辅料库</label>
+              <label><input type="checkbox" value="1101" class="mr-2">1101 电机库</label>
+              <label><input type="checkbox" value="1312" class="mr-2">1312 长帆成品库</label>
+            </div>
+            <input type="text" id="whcode-custom" class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all mt-1" placeholder="可手动输入新仓库代码，多个请用逗号隔开">
+          </div>
+
+          <button id="run-btn" type="submit" class="w-full py-3 bg-primary text-white rounded-lg font-medium flex items-center justify-center hover:bg-blue-700 transition">
+            <i class="fa fa-play mr-2"></i> 开始运行计划
+          </button>
+        </form>
+
+        <div id="result-section" class="mt-8 text-center hidden">
+          <div id="result-msg" class="mb-4 text-green-700 font-bold"></div>
+          <a id="download-link" href="#" class="inline-block py-3 px-6 bg-secondary text-white rounded-lg font-semibold" download style="pointer-events:none;opacity:0.6;">
+            <i class="fa fa-file-excel mr-2"></i> 下载MRP结果Excel
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function logout() {
+      alert('您已退出登录');
+      window.location.href = '/login';
+    }
+
+    window.onload = function() {
+      let today = new Date().toISOString().split('T')[0];
+      let end = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString().split('T')[0];
+      document.getElementById('start_date').value = today;
+      document.getElementById('end_date').value = end;
+    };
+
+    document.getElementById('mrp-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const runBtn = document.getElementById('run-btn');
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> 运行中...';
+
+      const start_date = document.getElementById('start_date').value;
+      const end_date = document.getElementById('end_date').value;
+
+      let checked = [];
+      document.querySelectorAll('#warehouse-list input[type=checkbox]:checked').forEach(c => checked.push(c.value));
+      let custom = document.getElementById('whcode-custom').value.trim();
+      if (custom) {
+        custom.split(',').forEach(code => {
+          code = code.trim();
+          if (code && !checked.includes(code)) checked.push(code);
+        });
+      }
+
+      const whcode = checked.join(',');
+
+      fetch('/api/mrp/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start_date, end_date, whcode })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('result-section').classList.remove('hidden');
+          document.getElementById('result-msg').innerText = "MRP运算完成，可下载结果文件";
+          const downloadLink = document.getElementById('download-link');
+          downloadLink.href = data.download_url || "#";
+          downloadLink.style.pointerEvents = '';
+          downloadLink.style.opacity = '1';
+        } else {
+          alert(data.message || 'MRP运算失败');
+        }
+      })
+      .catch(err => {
+        alert('请求失败，请稍后再试！');
+      })
+      .finally(() => {
+        runBtn.disabled = false;
+        runBtn.innerHTML = '<i class="fa fa-play mr-2"></i> 开始运行计划';
+      });
+    });
+  </script>
+</body>
+</html>

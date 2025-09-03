@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>分析报表 - 澳升泵业平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0088cc',
+            secondary: '#006400',
+            neutral: '#f9f9f9',
+            'neutral-dark': '#666666',
+          },
+          fontFamily: {
+            sans: ['Arial', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+</head>
+<body class="bg-neutral min-h-screen text-gray-800 font-sans">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white py-4 shadow-md fixed top-0 left-0 right-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-secondary text-2xl font-bold mr-2">澳升泵业</span>
+        <span class="text-primary text-lg font-semibold">生产管理辅助平台</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="text-sm text-gray-700">欢迎，<span class="font-semibold" id="user-name">admin</span></span>
+        <button onclick="logout()" class="text-sm text-white bg-primary px-4 py-2 rounded hover:bg-blue-700 transition">
+          <i class="fa fa-sign-out-alt mr-1"></i> 退出登录
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 页面布局 -->
+  <div class="flex pt-20">
+    <!-- 左侧菜单栏 -->
+    <aside class="w-60 bg-[#808080] h-screen fixed top-20 left-0 bottom-0 z-0 text-white">
+      <nav class="flex flex-col py-6 px-4 space-y-3">
+        <a href="/user_home.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-home mr-2"></i> 主页
+        </a>
+        <a href="/sync_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-sync-alt mr-2"></i> 数据同步
+        </a>
+        <a href="/mrp_run.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-cogs mr-2"></i> MRP运算
+        </a>
+        <a href="/purchase_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-file-alt mr-2"></i> 生成请购单
+        </a>
+        <a href="/mold_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-tools mr-2"></i> 模具管理
+        </a>
+        <a href="/report_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition bg-gray-700">
+          <i class="fa fa-chart-line mr-2"></i> 数据报表
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主内容区域 -->
+    <main class="ml-60 flex-1 p-6 space-y-10">
+      <h2 class="text-2xl font-bold mb-2">分析报表</h2>
+
+      <!-- 1. MRP计算过程 -->
+      <section class="bg-white p-6 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold mb-4 text-primary flex items-center">
+          <i class="fa fa-calculator mr-2"></i>MRP计算过程
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border border-gray-200">
+            <thead class="bg-neutral">
+              <tr class="text-left border-b">
+                <th class="py-2 px-4">物料编码</th>
+                <th class="py-2 px-4">物料名称</th>
+                <th class="py-2 px-4">总需求</th>
+                <th class="py-2 px-4">计算日期</th>
+                <th class="py-2 px-4">需求拆解详情</th>
+              </tr>
+            </thead>
+            <tbody id="mrp-process-list" class="text-gray-700">
+              <!-- JS动态填充MRP过程数据 -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 2. 请购单生成情况 -->
+      <section class="bg-white p-6 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold mb-4 text-primary flex items-center">
+          <i class="fa fa-file-invoice mr-2"></i>请购单生成情况
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border border-gray-200">
+            <thead class="bg-neutral">
+              <tr class="text-left border-b">
+                <th class="py-2 px-4">请购单号</th>
+                <th class="py-2 px-4">生成日期</th>
+                <th class="py-2 px-4">请购总数</th>
+                <th class="py-2 px-4">状态</th>
+                <th class="py-2 px-4">明细</th>
+              </tr>
+            </thead>
+            <tbody id="purchase-status-list" class="text-gray-700">
+              <!-- JS动态填充请购单数据 -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. 生产库存周转情况 -->
+      <section class="bg-white p-6 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold mb-4 text-primary flex items-center">
+          <i class="fa fa-warehouse mr-2"></i>生产库存周转情况
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border border-gray-200">
+            <thead class="bg-neutral">
+              <tr class="text-left border-b">
+                <th class="py-2 px-4">物料编码</th>
+                <th class="py-2 px-4">物料名称</th>
+                <th class="py-2 px-4">现存量</th>
+                <th class="py-2 px-4">在途/待检</th>
+                <th class="py-2 px-4">未领料</th>
+                <th class="py-2 px-4">未发货</th>
+                <th class="py-2 px-4">生产未完成</th>
+                <th class="py-2 px-4">日期</th>
+              </tr>
+            </thead>
+            <tbody id="stock-turnover-list" class="text-gray-700">
+              <!-- JS动态填充库存数据 -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4. 模具调拨记录 -->
+      <section class="bg-white p-6 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold mb-4 text-primary flex items-center">
+          <i class="fa fa-random mr-2"></i>模具调拨记录
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border border-gray-200">
+            <thead class="bg-neutral">
+              <tr class="text-left border-b">
+                <th class="py-2 px-4">模具ID</th>
+                <th class="py-2 px-4">调拨数量</th>
+                <th class="py-2 px-4">调出供应商</th>
+                <th class="py-2 px-4">调入供应商</th>
+                <th class="py-2 px-4">调拨日期</th>
+                <th class="py-2 px-4">备注</th>
+              </tr>
+            </thead>
+            <tbody id="mold-transfer-record-list" class="text-gray-700">
+              <!-- JS动态填充调拨记录 -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // 退出登录逻辑
+    function logout() {
+      alert('您已退出登录');
+      window.location.href = '/login';
+    }
+    // 设置用户名
+    document.getElementById('user-name').innerText =
+      localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).username : 'admin';
+
+    // 以下为模拟数据渲染（实际可通过ajax加载后端API数据）
+    // MRP过程
+    const mrpList = [
+      { code: '1001001', name: '泵壳', demand: 150, date: '2025-07-10', detail: '订单+BOM+库存拆解...' },
+    ];
+    mrpList.forEach(row => {
+      document.getElementById('mrp-process-list').innerHTML += `
+        <tr class="border-b">
+          <td class="py-2 px-4">${row.code}</td>
+          <td class="py-2 px-4">${row.name}</td>
+          <td class="py-2 px-4">${row.demand}</td>
+          <td class="py-2 px-4">${row.date}</td>
+          <td class="py-2 px-4">${row.detail}</td>
+        </tr>
+      `;
+    });
+    // 请购单
+    const purchaseList = [
+      { code: 'QGD202507110001', date: '2025-07-11', sum: 12, status: '已提交', detail: '点击查看' },
+    ];
+    purchaseList.forEach(row => {
+      document.getElementById('purchase-status-list').innerHTML += `
+        <tr class="border-b">
+          <td class="py-2 px-4">${row.code}</td>
+          <td class="py-2 px-4">${row.date}</td>
+          <td class="py-2 px-4">${row.sum}</td>
+          <td class="py-2 px-4">${row.status}</td>
+          <td class="py-2 px-4 text-blue-600 cursor-pointer">${row.detail}</td>
+        </tr>
+      `;
+    });
+    // 库存周转
+    const stockList = [
+      { code: '1001001', name: '泵壳', cur: 21, transit: 3, notout: 2, noship: 1, notdone: 5, date: '2025-07-11' },
+    ];
+    stockList.forEach(row => {
+      document.getElementById('stock-turnover-list').innerHTML += `
+        <tr class="border-b">
+          <td class="py-2 px-4">${row.code}</td>
+          <td class="py-2 px-4">${row.name}</td>
+          <td class="py-2 px-4">${row.cur}</td>
+          <td class="py-2 px-4">${row.transit}</td>
+          <td class="py-2 px-4">${row.notout}</td>
+          <td class="py-2 px-4">${row.noship}</td>
+          <td class="py-2 px-4">${row.notdone}</td>
+          <td class="py-2 px-4">${row.date}</td>
+        </tr>
+      `;
+    });
+    // 模具调拨
+    const moldList = [
+      { id: 'M001', qty: 2, from: '华星', to: '大业', date: '2025-07-10', note: '项目紧急' },
+    ];
+    moldList.forEach(row => {
+      document.getElementById('mold-transfer-record-list').innerHTML += `
+        <tr class="border-b">
+          <td class="py-2 px-4">${row.id}</td>
+          <td class="py-2 px-4">${row.qty}</td>
+          <td class="py-2 px-4">${row.from}</td>
+          <td class="py-2 px-4">${row.to}</td>
+          <td class="py-2 px-4">${row.date}</td>
+          <td class="py-2 px-4">${row.note}</td>
+        </tr>
+      `;
+    });
+  </script>
+</body>
+</html>

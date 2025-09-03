@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>模具管理 - 澳升泵业平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0088cc',
+            secondary: '#006400',
+            neutral: '#f9f9f9',
+            'neutral-dark': '#666666',
+          },
+          fontFamily: {
+            sans: ['Arial', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+</head>
+<body class="bg-neutral min-h-screen text-gray-800 font-sans">
+
+  <!-- 顶部导航栏 -->
+  <header class="bg-white py-4 shadow-md fixed top-0 left-0 right-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-secondary text-2xl font-bold mr-2">澳升泵业</span>
+        <span class="text-primary text-lg font-semibold">生产管理辅助平台</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="text-sm text-gray-700">欢迎，<span class="font-semibold">{{ username }}</span></span>
+        <button onclick="logout()" class="text-sm text-white bg-primary px-4 py-2 rounded hover:bg-blue-700 transition">
+          <i class="fa fa-sign-out-alt mr-1"></i> 退出登录
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 页面布局 -->
+  <div class="flex pt-20">
+    <!-- 左侧菜单栏 -->
+    <aside class="w-60 bg-[#808080] h-screen fixed top-20 left-0 bottom-0 z-0 text-white">
+      <nav class="flex flex-col py-6 px-4 space-y-3">
+        <a href="/user_home.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-home mr-2"></i> 主页
+        </a>
+        <a href="/sync_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-sync-alt mr-2"></i> 数据同步
+        </a>
+        <a href="/mrp_run.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-cogs mr-2"></i> MRP运算
+        </a>
+        <a href="/purchase_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-file-alt mr-2"></i> 生成请购单
+        </a>
+        <a href="/mold_main.html" class="flex items-center px-3 py-2 rounded bg-gray-700">
+          <i class="fa fa-tools mr-2"></i> 模具管理
+        </a>
+        <a href="/analysis_report.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-chart-line mr-2"></i> 数据报表
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主内容 -->
+    <main class="ml-60 flex-1 p-6">
+      <h2 class="text-2xl font-bold mb-6">模具管理</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <button class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition flex items-center space-x-4"
+                onclick="navigateTo('moldRegister')">
+          <i class="fa fa-cogs fa-lg text-primary"></i>
+          <span class="text-lg font-medium">模具登记</span>
+        </button>
+
+        <button class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition flex items-center space-x-4"
+                onclick="navigateTo('moldTransfer')">
+          <i class="fa fa-exchange-alt fa-lg text-primary"></i>
+          <span class="text-lg font-medium">模具调拨</span>
+        </button>
+
+        <!-- 如需增加其他按钮，可在此追加 -->
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function logout() {
+      alert('您已退出登录');
+      window.location.href = '/login';
+    }
+
+    function navigateTo(section) {
+      switch (section) {
+        case 'moldRegister':
+          window.location.href = '/mold_period.html';  // 跳转到模具台账登记
+          break;
+        case 'moldTransfer':
+          window.location.href = '/mold_transfer.html'; // 跳转到模具调拨页面
+          break;
+        default:
+          alert('未定义的操作');
+      }
+    }
+  </script>
+</body>
+</html>

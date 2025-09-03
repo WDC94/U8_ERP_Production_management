@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>数据设置</title>
+  <!-- 统一风格：Tailwind CDN + 自定义主题 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#0088cc', secondary: '#006400', neutral: '#f9f9f9', 'neutral-dark': '#666666' },
+          fontFamily: { sans: ['Arial','sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: #f9f9f9; }
+    .card { background:#fff; border-radius:0.75rem; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+    .table th,.table td{ padding:8px 12px; }
+
+    /* 覆盖层样式（含层级修复） */
+    #user-modal, #refund-modal, #proc-modal { position: fixed; inset: 0; z-index: 50; }
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35); z-index:50;}
+    .modal-box{background:#fff;margin:6vh auto;padding:18px;border-radius:12px;max-width:720px; position:relative; z-index:60;}
+
+    .form input[type="text"], .form input[type="password"], .form input[type="number"], .form select, .form textarea {
+      height:40px; padding:0 12px; border-radius:8px; border:1px solid #d1d5db; outline:none;
+    }
+    .form textarea { min-height:72px; padding:10px 12px; }
+    .btn { border-radius:8px; padding:8px 14px; }
+    .btn-primary { background:#0088cc; color:#fff; }
+    .btn-primary:hover { background:#0b72a5; }
+    .btn-ghost { border:1px solid #e5e7eb; }
+    .tag { display:inline-block; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:9999px; padding:2px 10px; font-size:12px; margin-right:6px; }
+  </style>
+</head>
+
+<body class="font-sans text-gray-800">
+  <!-- 顶部栏（白底固定） -->
+  <header class="bg-white py-4 shadow-md fixed top-0 left-0 right-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-xl font-bold mr-2">澳升泵业</span>
+        <span class="text-primary font-semibold">生产管理辅助平台</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="/user_home.html" class="text-sm text-gray-700 hover:text-primary">主页</a>
+        <span class="text-sm text-gray-700">欢迎，<span class="font-semibold">{{ username }}</span></span>
+        <button onclick="location.href='/login.html'" class="text-sm text-white bg-primary px-4 py-2 rounded hover:bg-blue-700 transition">退出登录</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex pt-20">
+    <!-- 侧边菜单（新增：数据设置） -->
+    <aside class="w-60 bg-[#808080] h-screen fixed top-20 left-0 bottom-0 text-white">
+      <nav class="flex flex-col py-6 px-4 space-y-3">
+        <a href="/user_home.html" class="px-3 py-2 rounded hover:bg-white/10">用户主页</a>
+        <a href="/sync_main.html" class="px-3 py-2 rounded hover:bg白/10">数据同步</a>
+        <a href="/mrp_run.html" class="px-3 py-2 rounded hover:bg-white/10">MRP运算</a>
+        <a href="/purchase_main.html" class="px-3 py-2 rounded hover:bg-white/10">生成请购单</a>
+        <a href="/mold_main.html" class="px-3 py-2 rounded hover:bg-white/10">模具管理</a>
+        <a href="/analysis_report.html" class="px-3 py-2 rounded hover:bg-white/10">数据报表</a>
+        <a href="/data_settings.html" class="px-3 py-2 rounded bg-white/20 hover:bg-white/10">数据设置</a>
+      </nav>
+    </aside>
+
+    <!-- 主内容 -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 md:px-6 lg:px-8 ml-60 pb-12 space-y-6">
+      <h1 class="text-lg font-bold mt-6">数据设置</h1>
+
+      <!-- 用户管理 -->
+      <section class="card p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold">用户管理</h2>
+          <div class="flex items-center gap-2">
+            <input id="user-kw" type="text" placeholder="搜索用户名/姓名" class="border rounded px-3 h-9" />
+            <button class="btn btn-ghost" onclick="loadUsers()">搜索</button>
+            <button class="btn btn-primary" onclick="openUserModal()">新增用户</button>
+          </div>
+        </div>
+        <div class="overflow-auto mt-3">
+          <table class="table min-w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50">
+                <th class="text-left">ID</th>
+                <th class="text-left">用户名</th>
+                <th class="text-left">姓名</th>
+                <th class="text-left">角色</th>
+                <th class="text-left">状态</th>
+                <th class="text-left">创建时间</th>
+                <th class="text-left">操作</th>
+              </tr>
+            </thead>
+            <tbody id="user-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 档案管理 -->
+      <section class="card p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold">档案管理</h2>
+          <div class="text-xs text-gray-500">包含：模具费返还方式、模具工艺、模具与物料对照表</div>
+        </div>
+
+        <!-- 返还方式 -->
+        <div class="mt-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">模具费返还方式（Mujufanhuan）</h3>
+            <div class="flex items-center gap-2">
+              <input id="refund-kw" type="text" placeholder="搜索返还方式" class="border rounded px-3 h-9" />
+              <button class="btn btn-ghost" onclick="loadRefunds()">搜索</button>
+              <button class="btn btn-primary" onclick="openRefundModal()">新增返还方式</button>
+            </div>
+          </div>
+          <div class="overflow-auto mt-2">
+            <table class="table min-w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="text-left">ID</th>
+                  <th class="text-left">返还方式</th>
+                  <th class="text-left">操作</th>
+                </tr>
+              </thead>
+              <tbody id="refund-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 模具工艺 -->
+        <div class="mt-6">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">模具工艺（MJGYi）</h3>
+            <div class="flex items-center gap-2">
+              <input id="proc-kw" type="text" placeholder="搜索工艺" class="border rounded px-3 h-9" />
+              <button class="btn btn-ghost" onclick="loadProcs()">搜索</button>
+              <button class="btn btn-primary" onclick="openProcModal()">新增工艺</button>
+            </div>
+          </div>
+          <div class="overflow-auto mt-2">
+            <table class="table min-w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="text-left">ID</th>
+                  <th class="text-left">工艺名称</th>
+                  <th class="text-left">操作</th>
+                </tr>
+              </thead>
+              <tbody id="proc-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 模具与物料对照表 -->
+        <div class="mt-6">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">模具与物料对照表（MJWLDZhao）</h3>
+            <div class="flex items-center gap-2">
+              <input id="map-kw" type="text" placeholder="按编码/名称搜索" class="border rounded px-3 h-9" />
+              <button class="btn btn-ghost" onclick="loadMappings(1)">搜索</button>
+            </div>
+          </div>
+          <div class="overflow-auto mt-2">
+            <table class="table min-w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="text-left">模具ID</th>
+                  <th class="text-left">模具名称</th>
+                  <th class="text-left">物料编码</th>
+                  <th class="text-left">物料名称</th>
+                </tr>
+              </thead>
+              <tbody id="map-tbody"></tbody>
+            </table>
+          </div>
+          <div class="flex items-center justify-between mt-2">
+            <div id="map-count" class="text-xs text-gray-500"></div>
+            <div class="flex items-center gap-2">
+              <button class="btn btn-ghost h-9 px-3" onclick="loadMappings(pager.page-1)">&lt; 上一页</button>
+              <span class="text-sm">第 <b id="pg">1</b> / <b id="pgmax">1</b> 页</span>
+              <button class="btn btn-ghost h-9 px-3" onclick="loadMappings(pager.page+1)">下一页 &gt;</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 通用模态框：用户 -->
+  <div id="user-modal" class="hidden">
+    <div class="modal-bg" onclick="closeUserModal()"></div>
+    <div class="modal-box">
+      <h3 class="font-semibold mb-3" id="user-modal-title">新增用户</h3>
+      <div class="form grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="hidden" id="user-id" />
+        <div>
+          <label class="text-sm">用户名</label>
+          <input id="user-username" type="text" class="w-full" placeholder="必填" />
+        </div>
+        <div>
+          <label class="text-sm">姓名</label>
+          <input id="user-realname" type="text" class="w-full" />
+        </div>
+        <div>
+          <label class="text-sm">角色</label>
+          <select id="user-role" class="w-full">
+            <option value="user">普通用户</option>
+            <option value="admin">管理员</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm">状态</label>
+          <select id="user-enabled" class="w-full">
+            <option value="1">启用</option>
+            <option value="0">禁用</option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm">密码（新增必填，修改为空则不变）</label>
+          <input id="user-password" type="password" class="w-full" placeholder="******" />
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-2">
+        <button class="btn btn-primary" onclick="submitUser()">保存</button>
+        <button class="btn btn-ghost" onclick="closeUserModal()">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通用模态框：返还方式 -->
+  <div id="refund-modal" class="hidden">
+    <div class="modal-bg" onclick="closeRefundModal()"></div>
+    <div class="modal-box">
+      <h3 class="font-semibold mb-3" id="refund-modal-title">新增返还方式</h3>
+      <div class="form">
+        <input type="hidden" id="refund-id" />
+        <label class="text-sm">返还方式</label>
+        <input id="refund-name" type="text" class="w-full" placeholder="如：达到订单量返还" />
+      </div>
+      <div class="mt-4 flex items-center gap-2">
+        <button class="btn btn-primary" onclick="submitRefund()">保存</button>
+        <button class="btn btn-ghost" onclick="closeRefundModal()">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通用模态框：工艺 -->
+  <div id="proc-modal" class="hidden">
+    <div class="modal-bg" onclick="closeProcModal"></div>
+    <div class="modal-box">
+      <h3 class="font-semibold mb-3" id="proc-modal-title">新增工艺</h3>
+      <div class="form">
+        <input type="hidden" id="proc-id" />
+        <label class="text-sm">工艺名称</label>
+        <input id="proc-name" type="text" class="w-full" placeholder="如：消失模/金属型/砂型" />
+      </div>
+      <div class="mt-4 flex items-center gap-2">
+        <button class="btn btn-primary" onclick="submitProc()">保存</button>
+        <button class="btn btn-ghost" onclick="closeProcModal()">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========= API 路径配置（可统一改动） =========
+    const API = {
+      // 用户
+      users: {
+        list: '/api/users/list',
+        create: '/api/users',
+        update: id => `/api/users/${id}`,
+        remove: id => `/api/users/${id}`
+      },
+      // 返还方式（Mujufanhuan）
+      refund: {
+        list: '/api/mold/dictionary/refund_methods',              // GET
+        create: '/api/mold/dictionary/refund_methods',            // POST {name}
+        update: id => `/api/mold/dictionary/refund_methods/${id}`,// PUT {name}
+        remove: id => `/api/mold/dictionary/refund_methods/${id}` // DELETE
+      },
+      // 工艺（MJGYi）
+      proc: {
+        list: '/api/mold/dictionary/process_methods',
+        create: '/api/mold/dictionary/process_methods',
+        update: id => `/api/mold/dictionary/process_methods/${id}`,
+        remove: id => `/api/mold/dictionary/process_methods/${id}`
+      },
+      // 对照表（MJWLDZhao）
+      mapping: (kw, page, size) => `/api/mold/mjwldzhao/list?kw=${encodeURIComponent(kw||'')}&page=${page||1}&size=${size||20}`
+    };
+
+    // ========= 工具 =========
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    const toast = (m) => alert(m);
+    async function http(url, opt={}){
+      const r = await fetch(url, opt);
+      if(!r.ok) throw new Error(await r.text());
+      try { return await r.json(); } catch { return null; }
+    }
+
+    // ========= 用户管理 =========
+    async function loadUsers(){
+      const kw = ($('#user-kw').value||'').trim();
+      const data = await http(API.users.list + (kw? ('?kw='+encodeURIComponent(kw)) : ''));
+      const rows = Array.isArray(data?.data) ? data.data : (Array.isArray(data)?data:[]);
+      const tb = $('#user-tbody'); tb.innerHTML='';
+      const frag = document.createDocumentFragment();
+      rows.forEach(u=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${u.id ?? ''}</td>
+          <td>${u.username ?? ''}</td>
+          <td>${u.real_name ?? u.display_name ?? ''}</td>
+          <td>${u.role ?? ''}</td>
+          <td>${(u.enabled===0||u.enabled===false)?'禁用':'启用'}</td>
+          <td>${u.created_at ?? ''}</td>
+          <td class="whitespace-nowrap">
+            <button class="text-blue-600 mr-3" onclick='editUser(${JSON.stringify(u).replace(/'/g,"&#39;")})'>编辑</button>
+            <button class="text-red-600" onclick='delUser(${u.id})'>删除</button>
+          </td>
+        `;
+        frag.appendChild(tr);
+      });
+      tb.appendChild(frag);
+    }
+    function openUserModal(){
+      $('#user-modal-title').textContent = '新增用户';
+      $('#user-id').value=''; $('#user-username').value=''; $('#user-realname').value='';
+      $('#user-role').value='user'; $('#user-enabled').value='1'; $('#user-password').value='';
+      $('#user-modal').classList.remove('hidden');
+    }
+    function closeUserModal(){ $('#user-modal').classList.add('hidden'); }
+    function editUser(u){
+      $('#user-modal-title').textContent = '编辑用户';
+      $('#user-id').value = u.id || '';
+      $('#user-username').value = u.username || '';
+      $('#user-realname').value = u.real_name || u.display_name || '';
+      $('#user-role').value = u.role || 'user';
+      $('#user-enabled').value = (u.enabled===0||u.enabled===false)?'0':'1';
+      $('#user-password').value = '';
+      $('#user-modal').classList.remove('hidden');
+    }
+    async function submitUser(){
+      const id = $('#user-id').value;
+      const payload = {
+        username: $('#user-username').value.trim(),
+        real_name: $('#user-realname').value.trim(),
+        role: $('#user-role').value,
+        enabled: $('#user-enabled').value==='1'
+      };
+      const pwd = $('#user-password').value;
+      if(!id && !pwd){ toast('新增用户必须设置密码'); return; }
+      if(pwd) payload.password = pwd;
+      try{
+        if(id){
+          await http(API.users.update(id), {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+        }else{
+          await http(API.users.create, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+        }
+        toast('保存成功'); closeUserModal(); loadUsers();
+      }catch(e){ console.error(e); toast('保存失败'); }
+    }
+    async function delUser(id){
+      if(!confirm('确认删除该用户？')) return;
+      try{ await http(API.users.remove(id), {method:'DELETE'}); toast('删除成功'); loadUsers(); }
+      catch(e){ console.error(e); toast('删除失败'); }
+    }
+
+    // ========= 返还方式 =========
+    async function loadRefunds(){
+      const kw = ($('#refund-kw').value||'').trim();
+      const data = await http(API.refund.list);
+      let rows = Array.isArray(data)?data: (Array.isArray(data?.data)?data.data:[]);
+      if(kw) rows = rows.filter(x => (x.name||'').includes(kw));
+      const tb = $('#refund-tbody'); tb.innerHTML='';
+      rows.forEach(x=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${x.id??''}</td>
+          <td>${x.name??''}</td>
+          <td class="whitespace-nowrap">
+            <button class="text-blue-600 mr-3" onclick='openRefundModal(${x.id},"${(x.name||'').replace(/"/g,'&quot;')}")'>编辑</button>
+            <button class="text-red-600" onclick='delRefund(${x.id})'>删除</button>
+          </td>
+        `;
+        tb.appendChild(tr);
+      });
+    }
+    function openRefundModal(id='', name=''){
+      $('#refund-modal-title').textContent = id? '编辑返还方式' : '新增返还方式';
+      $('#refund-id').value = id || '';
+      $('#refund-name').value = name || '';
+      $('#refund-modal').classList.remove('hidden');
+    }
+    function closeRefundModal(){ $('#refund-modal').classList.add('hidden'); }
+    async function submitRefund(){
+      const id = $('#refund-id').value;
+      const name = $('#refund-name').value.trim();
+      if(!name){ toast('请输入返还方式'); return; }
+      try{
+        if(id){
+          await http(API.refund.update(id), {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})});
+        }else{
+          await http(API.refund.create, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})});
+        }
+        toast('保存成功'); closeRefundModal(); loadRefunds();
+      }catch(e){ console.error(e); toast('保存失败'); }
+    }
+    async function delRefund(id){
+      if(!confirm('确认删除该返还方式？')) return;
+      try{ await http(API.refund.remove(id), {method:'DELETE'}); toast('删除成功'); loadRefunds(); }
+      catch(e){ console.error(e); toast('删除失败'); }
+    }
+
+    // ========= 工艺 =========
+    async function loadProcs(){
+      const kw = ($('#proc-kw').value||'').trim();
+      const data = await http(API.proc.list);
+      let rows = Array.isArray(data)?data: (Array.isArray(data?.data)?data.data:[]);
+      if(kw) rows = rows.filter(x => (x.name||'').includes(kw));
+      const tb = $('#proc-tbody'); tb.innerHTML='';
+      rows.forEach(x=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${x.id??''}</td>
+          <td>${x.name??''}</td>
+          <td class="whitespace-nowrap">
+            <button class="text-blue-600 mr-3" onclick='openProcModal(${x.id},"${(x.name||'').replace(/"/g,'&quot;')}")'>编辑</button>
+            <button class="text-red-600" onclick='delProc(${x.id})'>删除</button>
+          </td>
+        `;
+        tb.appendChild(tr);
+      });
+    }
+    function openProcModal(id='', name=''){
+      $('#proc-modal-title').textContent = id? '编辑工艺' : '新增工艺';
+      $('#proc-id').value = id || '';
+      $('#proc-name').value = name || '';
+      $('#proc-modal').classList.remove('hidden');
+    }
+    function closeProcModal(){ $('#proc-modal').classList.add('hidden'); }
+    async function submitProc(){
+      const id = $('#proc-id').value;
+      const name = $('#proc-name').value.trim();
+      if(!name){ toast('请输入工艺名称'); return; }
+      try{
+        if(id){
+          await http(API.proc.update(id), {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})});
+        }else{
+          await http(API.proc.create, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name})});
+        }
+        toast('保存成功'); closeProcModal(); loadProcs();
+      }catch(e){ console.error(e); toast('保存失败'); }
+    }
+    async function delProc(id){
+      if(!confirm('确认删除该工艺？')) return;
+      try{ await http(API.proc.remove(id), {method:'DELETE'}); toast('删除成功'); loadProcs(); }
+      catch(e){ console.error(e); toast('删除失败'); }
+    }
+
+    // ========= 对照表 =========
+    const pager = { page:1, size:20, total:0, max:1 };
+    async function loadMappings(page=1){
+      if(page<1) page=1;
+      const kw = ($('#map-kw').value||'').trim();
+      try{
+        const data = await http(API.mapping(kw, page, pager.size));
+        // 兼容两种返回：{data, total} 或 直接数组
+        const rows = Array.isArray(data?.data) ? data.data : (Array.isArray(data)?data:[]);
+        pager.total = data?.total ?? rows.length;
+        pager.page = page;
+        pager.max = Math.max(1, Math.ceil(pager.total / pager.size));
+        $('#pg').textContent = pager.page;
+        $('#pgmax').textContent = pager.max;
+        $('#map-count').textContent = `共 ${pager.total} 条`;
+
+        const tb = $('#map-tbody'); tb.innerHTML='';
+        const frag = document.createDocumentFragment();
+        rows.forEach(m=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${m.MJ_id ?? m.mj_id ?? ''}</td>
+            <td>${m.MJ_name ?? m.mj_name ?? ''}</td>
+            <td>${m.cinvcode ?? ''}</td>
+            <td>${m.cinvname ?? ''}</td>
+          `;
+          frag.appendChild(tr);
+        });
+        tb.appendChild(frag);
+      }catch(e){
+        console.error(e); toast('加载对照表失败');
+      }
+    }
+
+    // ========= 初始化 =========
+    (function(){
+      loadUsers();
+      loadRefunds();
+      loadProcs();
+      loadMappings(1);
+    })();
+
+    // ========= 模态控制导出 =========
+    window.openUserModal = openUserModal;
+    window.closeUserModal = closeUserModal;
+    window.editUser = editUser;
+    window.submitUser = submitUser;
+    window.delUser = delUser;
+
+    window.openRefundModal = openRefundModal;
+    window.closeRefundModal = closeRefundModal;
+    window.submitRefund = submitRefund;
+    window.delRefund = delRefund;
+
+    window.openProcModal = openProcModal;
+    window.closeProcModal = closeProcModal;
+    window.submitProc = submitProc;
+    window.delProc = delProc;
+
+    window.loadMappings = loadMappings;
+  </script>
+</body>
+</html>

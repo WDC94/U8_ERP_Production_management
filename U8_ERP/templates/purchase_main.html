@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>请购单生成与明细 - 澳升泵业平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0088cc',
+            secondary: '#006400',
+            neutral: '#f9f9f9',
+            'neutral-dark': '#666666',
+          },
+          fontFamily: {
+            sans: ['Arial', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+</head>
+<body class="bg-neutral min-h-screen text-gray-800 font-sans">
+
+  <!-- 顶部导航栏 -->
+  <header class="bg-white py-4 shadow-md fixed top-0 left-0 right-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-secondary text-2xl font-bold mr-2">澳升泵业</span>
+        <span class="text-primary text-lg font-semibold">生产管理辅助平台</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="text-sm text-gray-700">欢迎，<span class="font-semibold">{{ username }}</span></span>
+        <button onclick="logout()" class="text-sm text-white bg-primary px-4 py-2 rounded hover:bg-blue-700 transition">
+          <i class="fa fa-sign-out-alt mr-1"></i> 退出登录
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 页面布局 -->
+  <div class="flex pt-20">
+    <!-- 左侧菜单栏 -->
+    <aside class="w-60 bg-[#808080] h-screen fixed top-20 left-0 bottom-0 z-0 text-white">
+      <nav class="flex flex-col py-6 px-4 space-y-3">
+        <a href="/user_home.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-home mr-2"></i> 主页
+        </a>
+        <a href="/sync_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-sync-alt mr-2"></i> 数据同步
+        </a>
+        <a href="/mrp_run.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-cogs mr-2"></i> MRP运算
+        </a>
+        <a href="/purchase_main.html" class="flex items-center px-3 py-2 rounded bg-gray-700">
+          <i class="fa fa-file-alt mr-2"></i> 生成请购单
+        </a>
+        <a href="/mold_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-tools mr-2"></i> 模具管理
+        </a>
+        <a href="/report_main.html" class="flex items-center px-3 py-2 rounded hover:bg-gray-700 transition">
+          <i class="fa fa-chart-line mr-2"></i> 数据报表
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主业务内容 -->
+    <main class="ml-60 flex-1 p-6">
+      <h2 class="text-2xl font-bold mb-6">MRP生成请购单</h2>
+
+      <div class="bg-white p-6 rounded-xl shadow-md max-w-6xl">
+        <div class="mb-6">
+          <div class="text-gray-700 text-base mb-2">
+            <i class="fa fa-info-circle text-primary mr-1"></i>
+            MRP计算已完成，点击下方按钮生成采购请购单并可查看明细。
+          </div>
+          <button id="generate-btn" class="py-3 px-6 bg-primary text-white rounded-lg font-medium flex items-center justify-center mb-2 hover:bg-blue-700 transition">
+            <i class="fa fa-file-signature mr-2"></i> 生成请购单
+          </button>
+          <span id="generate-tip" class="ml-4 text-green-600 font-bold hidden"><i class="fa fa-check mr-1"></i> 生成成功！</span>
+        </div>
+
+        <div class="mt-6">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-lg font-semibold text-gray-800"><i class="fa fa-list-ul mr-2"></i>已生成请购单明细</span>
+            <button id="download-all-btn" class="py-2 px-4 bg-secondary text-white rounded hover:bg-green-700 transition text-sm flex items-center">
+              <i class="fa fa-file-excel mr-2"></i>下载全部明细
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm border border-gray-200 bg-white rounded">
+              <thead class="bg-neutral">
+                <tr>
+                  <th class="py-2 px-3 border-b">请购单号</th>
+                  <th class="py-2 px-3 border-b">生成日期</th>
+                  <th class="py-2 px-3 border-b">物料编码</th>
+                  <th class="py-2 px-3 border-b">物料名称</th>
+                  <th class="py-2 px-3 border-b">数量</th>
+                  <th class="py-2 px-3 border-b">分类</th>
+                  <th class="py-2 px-3 border-b">需求日</th>
+                  <th class="py-2 px-3 border-b">操作</th>
+                </tr>
+              </thead>
+              <tbody id="purchase-table">
+                <tr>
+                  <td colspan="8" class="text-center text-gray-500 py-6">正在加载数据…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="pagination" class="mt-4 flex justify-center gap-2"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function logout() {
+      alert('您已退出登录');
+      window.location.href = '/login';
+    }
+
+    document.getElementById('generate-btn').addEventListener('click', function () {
+      const btn = this;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> 正在生成...';
+      document.getElementById('generate-tip').classList.add('hidden');
+
+      fetch('/api/purchase/generate', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('generate-tip').classList.remove('hidden');
+            loadPurchaseList();
+          } else {
+            alert(data.message || '生成请购单失败！');
+          }
+        })
+        .catch(() => alert('请求失败，请稍后重试！'))
+        .finally(() => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa fa-file-signature mr-2"></i> 生成请购单';
+        });
+    });
+
+    document.getElementById('download-all-btn').addEventListener('click', function () {
+      window.open('/api/purchase/export', '_blank');
+    });
+
+    let page = 1, pageSize = 20, total = 0;
+
+    function loadPurchaseList(p = 1) {
+      page = p;
+      fetch(`/api/purchase/list?page=${page}&page_size=${pageSize}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && Array.isArray(data.data)) {
+            renderTable(data.data);
+            renderPagination(data.total || 0, page, pageSize);
+          } else {
+            renderTable([]);
+          }
+        })
+        .catch(() => renderTable([]));
+    }
+
+    function renderTable(rows) {
+      const tbody = document.getElementById('purchase-table');
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-gray-400 py-6">暂无明细</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map(row => `
+        <tr>
+          <td class="py-2 px-3 border-b">${row.cCode || ''}</td>
+          <td class="py-2 px-3 border-b">${row.dDate || ''}</td>
+          <td class="py-2 px-3 border-b">${row.cInvCode || ''}</td>
+          <td class="py-2 px-3 border-b">${row.cInvName || ''}</td>
+          <td class="py-2 px-3 border-b">${row.fQuantity || ''}</td>
+          <td class="py-2 px-3 border-b">${row.category || ''}</td>
+          <td class="py-2 px-3 border-b">${row.dRequirDate || ''}</td>
+          <td class="py-2 px-3 border-b">
+            ${row.detail_excel_url ? `<a href="${row.detail_excel_url}" class="text-primary underline" target="_blank"><i class="fa fa-download"></i> 下载</a>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderPagination(totalCount, currentPage, pageSize) {
+      total = Math.ceil(totalCount / pageSize);
+      const pagination = document.getElementById('pagination');
+      if (total <= 1) {
+        pagination.innerHTML = '';
+        return;
+      }
+      let html = '';
+      for (let i = 1; i <= total; i++) {
+        html += `<button class="px-3 py-1 mx-1 rounded ${i === currentPage ? 'bg-primary text-white' : 'bg-gray-100'}" onclick="loadPurchaseList(${i})">${i}</button>`;
+      }
+      pagination.innerHTML = html;
+    }
+
+    window.onload = () => {
+      loadPurchaseList();
+    };
+    window.loadPurchaseList = loadPurchaseList;
+  </script>
+</body>
+</html>
