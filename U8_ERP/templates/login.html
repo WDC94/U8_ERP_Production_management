@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>澳升泵业生产管理辅助平台 - 登录</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0088cc',
+            secondary: '#006400',
+            neutral: '#f9f9f9',
+            'neutral-dark': '#666666',
+          },
+          fontFamily: {
+            sans: ['Arial', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .login-shadow {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .btn-hover {
+        @apply transition-all duration-300 hover:bg-gray-100;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-white flex justify-center items-center">
+  <div class="w-full max-w-6xl mx-auto p-4 md:p-8">
+    <!-- 头部区域 -->
+    <header style="position: absolute; left: 50px; top: 50px; flex flex-col md:flex-row items-center justify-start md:justify-between mb-8">
+      <div class="flex items-center mb-4 md:mb-0">
+        <span class="text-secondary text-xl md:text-6xl font-bold mr-2">澳升</span>
+        <span class="text-secondary text-xl md:text-6xl font-bold mr-2">泵业</span>
+        <span class="text-gray-800 text-xl md:text-5xl font-bold mr-2">|</span>
+        <span class="text-primary text-lg md:text-4xl font-semibold">aosheng </span>
+        <span class="text-gray-800 text-lg md:text-4xl font-semibold">&nbsp;生产管理辅助平台</span>
+      </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="flex flex-col lg:flex-row items-center justify-between gap-8">
+      <!-- 左侧图片区域 -->
+      <div class="w-full lg:w-1/2 relative overflow-hidden rounded-lg shadow-lg">
+        <img src="https://picsum.photos/id/1036/800/600" alt="泵站与地球" class="w-full h-auto object-cover">
+        <div class="absolute inset-0 bg-gradient-to-r from-primary/60 to-transparent flex items-end">
+          <div class="p-6 text-white">
+            <h2 class="text-2xl font-bold mb-2">生产管理辅助平台</h2>
+            <p class="text-sm md:text-base">实现MRP计算与模具精细管理</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧登录表单 -->
+      <div class="w-full lg:w-5/12 bg-white rounded-xl p-6 md:p-8 login-shadow">
+        <div class="flex items-center justify-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-800">账号登录</h3>
+        </div>
+
+        <form id="login-form" class="space-y-4">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <i class="fa fa-user text-gray-400"></i>
+            </div>
+            <input type="text" id="username" autocomplete="username" class="block w-full pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="用户名" required>
+          </div>
+
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <i class="fa fa-lock text-gray-400"></i>
+            </div>
+            <input type="password" id="password" autocomplete="current-password" class="block w-full pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="密码" required>
+          </div>
+
+          <!-- 多账套支持（如有需要可取消注释） -->
+          <!--
+          <div class="relative">
+            <input type="text" id="account_code" class="block w-full py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="账套代码(可选)">
+          </div>
+          -->
+
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <input id="remember-password" type="checkbox" class="w-4 h-4 text-primary focus:ring-primary/50 border-gray-300 rounded">
+              <label for="remember-password" class="ml-2 text-sm text-gray-600">记住密码</label>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-primary text-white rounded-lg font-medium btn-hover flex items-center justify-center">
+            <i class="fa fa-sign-in mr-2"></i>
+            登录
+          </button>
+        </form>
+
+        <div class="mt-6 pt-6 border-t border-gray-100">
+          <p class="text-center text-sm text-neutral-dark">
+            <i class="fa fa-copyright mr-1"></i>
+            澳升泵业（浙江）有限公司
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 登录表单对接后端API -->
+  <script>
+  document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    // 如有多账套，取消注释下面一行
+    // const account_code = document.getElementById('account_code').value.trim();
+
+    if (!username || !password) {
+      alert('请输入用户名和密码');
+      return;
+    }
+
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> 登录中...';
+
+    try {
+      const resp = await fetch('/api/user/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          password
+          // ,account_code
+        })
+      });
+
+      const data = await resp.json();
+
+      if (resp.ok && data.user) {
+        // 登录成功，跳转到用户首页
+        window.location.href = 'user_home.html';
+      } else {
+        alert(data.msg || '用户名或密码错误');
+      }
+    } catch (err) {
+      alert('网络异常或服务器错误，请稍后重试');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa fa-sign-in mr-2"></i> 登录';
+    }
+  });
+  </script>
+</body>
+</html>
