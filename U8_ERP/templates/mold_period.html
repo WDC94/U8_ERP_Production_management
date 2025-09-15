@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <title>模具台账登记</title>
-  <!-- Tailwind -->
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: { primary: '#0088cc', secondary: '#006400', neutral: '#f9f9f9', 'neutral-dark': '#666666' },
+          colors: { primary: '#0088cc', secondary: '#006400', neutral: '#f9f9f9' },
           fontFamily: { sans: ['Arial','sans-serif'] }
         }
       }
     }
   </script>
+
   <style>
     body { background: #f9f9f9; }
     /* 表单控件统一尺寸与圆角 */
@@ -35,57 +37,71 @@
       border: 1px solid #d1d5db;
       outline: none;
     }
-    #mold-period-form .grid > div { min-width: 260px; }
+    #mold-period-form .grid > div { min-width: 200px; }
+
     .chip{display:inline-flex;align-items:center;border:1px solid #d1d5db;border-radius:9999px;padding:0 10px;margin:4px 6px 0 0;font-size:12px;white-space:nowrap}
     .chip .x{margin-left:8px;cursor:pointer}
-    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35)}
-    .modal-box{background:#fff;margin:5vh auto;padding:16px;border-radius:12px;max-width:960px}
-    .dropdown{position:absolute;z-index:50;background:#fff;border:1px solid #e5e7eb;border-radius:.5rem;box-shadow:0 2px 10px rgba(0,0,0,.08);max-height:240px;overflow:auto;width:100%}
+
+    /* modal */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40}
+    .modal-box{
+      position:fixed;
+      z-index:50;
+      left:50%;
+      transform:translateX(-50%);
+      top:12vh;
+      background:#fff;
+      padding:16px;
+      border-radius:12px;
+      max-width:1000px;
+      width:calc(100% - 40px);
+      box-shadow:0 8px 30px rgba(0,0,0,.2);
+    }
+
+    .dropdown{position:absolute;z-index:60;background:#fff;border:1px solid #e5e7eb;border-radius:.5rem;box-shadow:0 2px 10px rgba(0,0,0,.08);max-height:240px;overflow:auto;width:100%}
     .dropdown div{padding:8px 10px;cursor:pointer}
     .dropdown div:hover{background:#f3f4f6}
+
+    /* 主内容向右扩展 */
+    main{margin-left:60px;padding-right:40px;}
   </style>
 </head>
 
 <body class="font-sans text-gray-800">
-  <!-- 顶部栏 -->
+  <!-- 顶部 -->
   <header class="bg-white py-4 shadow-md fixed top-0 left-0 right-0 z-10">
     <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
       <div class="flex items-center">
-        <span class="text-xl font-bold mr-2">澳升泵业</span>
-        <span class="text-primary font-semibold">生产管理辅助平台</span>
+        <span class="text-xl font-bold mr-2">模具管理</span>
+        <span class="text-primary font-semibold">台账登记</span>
       </div>
       <div class="flex items-center space-x-4">
         <a href="/user_home.html" class="text-sm text-gray-700 hover:text-primary">主页</a>
         <span class="text-sm text-gray-700">欢迎，<span class="font-semibold">{{ username }}</span></span>
-        <button onclick="logout()" class="text-sm text-white bg-primary px-4 py-2 rounded hover:bg-blue-700 transition">退出登录</button>
+        <button onclick="logout()" class="text-sm text-white bg-primary px-4 py-2 rounded hover:bg-blue-700 transition">退出</button>
       </div>
     </div>
   </header>
 
   <div class="flex pt-20">
-    <!-- 侧边菜单 -->
+    <!-- 侧边 -->
     <aside class="w-60 bg-[#808080] h-screen fixed top-20 left-0 bottom-0 text-white">
       <nav class="flex flex-col py-6 px-4 space-y-3">
         <a href="/user_home.html" class="px-3 py-2 rounded hover:bg-white/10">用户主页</a>
-        <a href="/sync_main.html" class="px-3 py-2 rounded hover:bg-white/10">数据同步</a>
-        <a href="/mrp_run.html" class="px-3 py-2 rounded hover:bg-white/10">MRP运算</a>
-        <a href="/purchase_main.html" class="px-3 py-2 rounded hover:bg-white/10">生成请购单</a>
         <a href="/mold_main.html" class="px-3 py-2 rounded hover:bg-white/10 bg-white/20">模具管理</a>
-        <a href="/analysis_report.html" class="px-3 py-2 rounded hover:bg-white/10">数据报表</a>
-        <!-- ✅ 新增：数据设置 -->
         <a href="/data_settings.html" class="px-3 py-2 rounded hover:bg-white/10">数据设置</a>
       </nav>
     </aside>
 
     <!-- 主内容 -->
-    <main class="flex-1 max-w-7xl mx-auto px-4 md:px-6 lg:px-8 ml-60 pb-10">
-      <!-- 表单 -->
+    <main class="flex-1 max-w-screen-xl mx-auto px-6 ml-60 pb-10">
+      <!-- 表单卡片 -->
       <section class="bg-white shadow rounded-xl mt-6 p-5">
         <h1 class="text-lg font-bold mb-4">模具台账登记</h1>
 
         <form id="mold-period-form" class="space-y-6" autocomplete="off">
-          <!-- 第一行 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- 行1: 产品 / 铸造供应商 / 模具供应商 / 所属公司 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             <div>
               <label class="block text-sm font-semibold mb-1">模具产品名称</label>
               <input id="product_name" type="text" class="w-full" placeholder="请输入模具产品名称" required />
@@ -104,10 +120,20 @@
               <input type="hidden" id="mold-supplier-id" />
               <div id="mold-supplier-list" class="dropdown hidden"></div>
             </div>
+
+            <div>
+              <label class="block text-sm font-semibold mb-1">所属公司</label>
+              <select id="company" class="w-full">
+                <option value="">请选择</option>
+                <option value="浙江南泵">浙江南泵</option>
+                <option value="澳升泵业">澳升泵业</option>
+                <option value="长帆机械">长帆机械</option>
+              </select>
+            </div>
           </div>
 
-          <!-- 第二行 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- 行2: 开模 / 交付 / 金额 / 工艺 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             <div>
               <label class="block text-sm font-semibold mb-1">开模时间</label>
               <input id="start_date" type="date" class="w-full" />
@@ -120,27 +146,16 @@
               <label class="block text-sm font-semibold mb-1">金额（元）</label>
               <input id="amount" type="number" step="0.01" class="w-full" placeholder="0.00" />
             </div>
-          </div>
-
-          <!-- 第三行 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div>
-              <label class="block text-sm font-semibold mb-1">所属公司</label>
-              <select id="company" class="w-full">
-                <option value="">请选择</option>
-                <option value="浙江南泵">浙江南泵</option>
-                <option value="澳升泵业">澳升泵业</option>
-                <option value="长帆机械">长帆机械</option>
-              </select>
-            </div>
-
             <div>
               <label class="block text-sm font-semibold mb-1">模具工艺</label>
               <select id="process_id" class="w-full">
                 <option value="">请选择</option>
               </select>
             </div>
+          </div>
 
+          <!-- 行3: 是否返还 / 返还方式 / 物料多选 / 是否开票 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             <div>
               <label class="block text-sm font-semibold mb-1">模具费是否返还</label>
               <select id="refund_yes_no" class="w-full">
@@ -148,10 +163,7 @@
                 <option value="是">是</option>
               </select>
             </div>
-          </div>
 
-          <!-- 第四行 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             <div>
               <label class="block text-sm font-semibold mb-1">模具费返还方式</label>
               <select id="refund_method_id" class="w-full" disabled>
@@ -168,17 +180,36 @@
             </div>
 
             <div>
+              <label class="block text-sm font-semibold mb-1">是否开票</label>
+              <select id="is_invoiced" class="w-full">
+                <option value="0">否</option>
+                <option value="1">是</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 行4: 预付款 / 余款未付 / 备注(跨2列) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div>
+              <label class="block text-sm font-semibold mb-1">预付款金额（元）</label>
+              <input id="advance_amount" type="number" step="0.01" class="w-full" placeholder="0.00" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">余款未付金额（元）</label>
+              <input id="balance_unpaid" type="number" step="0.01" class="w-full" placeholder="0.00" />
+            </div>
+            <div class="md:col-span-2 lg:col-span-2">
               <label class="block text-sm font-semibold mb-1">备注</label>
               <textarea id="remark" class="w-full" placeholder="可填写补充信息"></textarea>
             </div>
           </div>
 
-          <!-- 附件 -->
+          <!-- 行5: 附件 -->
           <div>
             <label class="block text-sm font-semibold mb-1">附件</label>
             <div class="flex items-center gap-3">
               <button type="button" id="upload-btn" class="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200">选择文件</button>
-              <span class="text-sm text-gray-500">可一次选择多个文件</span>
+              <span class="text-sm text-gray-500">可一次选择多个</span>
             </div>
             <input id="file-input" type="file" multiple class="hidden" />
             <div id="file-list" class="mt-2 text-sm"></div>
@@ -191,13 +222,12 @@
         </form>
       </section>
 
-      <!-- 列表 -->
+      <!-- 列表卡片 -->
       <section class="bg-white shadow rounded-xl mt-6 p-5">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold">已登记模具台账</h2>
           <div class="flex items-center gap-2">
             <button class="px-3 py-2 text-sm rounded border" onclick="loadList()">刷新</button>
-            <!-- ✅ 改为服务端导出，避免 Excel 乱码 -->
             <a class="px-3 py-2 text-sm rounded border bg-gray-50 hover:bg-gray-100" href="/api/mold/period/export/csv">导出 CSV</a>
             <a class="px-3 py-2 text-sm rounded border bg-gray-50 hover:bg-gray-100" href="/api/mold/period/export/xlsx">导出 Excel</a>
           </div>
@@ -206,20 +236,23 @@
           <table class="min-w-full text-sm">
             <thead>
               <tr class="bg-gray-50">
-                <th class="text-left px-3 py-2">ID</th>
-                <th class="text-left px-3 py-2">产品名称</th>
-                <th class="text-left px-3 py-2">铸造供应商</th>
-                <th class="text-left px-3 py-2">模具供应商</th>
-                <th class="text-left px-3 py-2">物料编码</th>
-                <th class="text-left px-3 py-2">开模时间</th>
-                <th class="text-left px-3 py-2">交付时间</th>
-                <th class="text-left px-3 py-2">金额</th>
-                <th class="text-left px-3 py-2">是否返还</th>
-                <th class="text-left px-3 py-2">返还方式</th>
-                <th class="text-left px-3 py-2">工艺</th>
-                <th class="text-left px-3 py-2">所属公司</th>
-                <th class="text-left px-3 py-2">备注</th>
-                <th class="text-left px-3 py-2">操作</th>
+                <th class="px-3 py-2 text-left">ID</th>
+                <th class="px-3 py-2 text-left">产品名称</th>
+                <th class="px-3 py-2 text-left">铸造供应商</th>
+                <th class="px-3 py-2 text-left">模具供应商</th>
+                <th class="px-3 py-2 text-left">物料编码</th>
+                <th class="px-3 py-2 text-left">开模时间</th>
+                <th class="px-3 py-2 text-left">交付时间</th>
+                <th class="px-3 py-2 text-left">金额</th>
+                <th class="px-3 py-2 text-left">预付款</th>
+                <th class="px-3 py-2 text-left">余款未付</th>
+                <th class="px-3 py-2 text-left">是否开票</th>
+                <th class="px-3 py-2 text-left">是否返还</th>
+                <th class="px-3 py-2 text-left">返还方式</th>
+                <th class="px-3 py-2 text-left">工艺</th>
+                <th class="px-3 py-2 text-left">所属公司</th>
+                <th class="px-3 py-2 text-left">备注</th>
+                <th class="px-3 py-2 text-left">操作</th>
               </tr>
             </thead>
             <tbody id="list-body"></tbody>
@@ -230,16 +263,16 @@
   </div>
 
   <!-- 编辑弹窗 -->
-  <div id="edit-modal" class="hidden">
+  <div id="edit-modal" class="hidden" aria-hidden="true">
     <div class="modal-bg" onclick="closeEdit()"></div>
-    <div class="modal-box">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="edit-title">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="font-bold text-lg">编辑模具台账</h3>
+        <h3 id="edit-title" class="font-bold text-lg">编辑模具台账</h3>
         <button class="px-2 py-1 border rounded" onclick="closeEdit()">关闭</button>
       </div>
-      <form id="edit-form" class="space-y-4">
+      <form id="edit-form" class="space-y-4" onsubmit="return false;">
         <input type="hidden" id="edit-id" />
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           <div>
             <label class="block text-sm font-semibold mb-1">模具产品名称</label>
             <input id="edit-product_name" type="text" class="w-full" />
@@ -258,6 +291,13 @@
             </select>
           </div>
           <div>
+            <label class="block text-sm font-semibold mb-1">模具工艺</label>
+            <select id="edit-process_id" class="w-full">
+              <option value="">请选择</option>
+            </select>
+          </div>
+
+          <div>
             <label class="block text-sm font-semibold mb-1">开模时间</label>
             <input id="edit-start_date" type="date" class="w-full" />
           </div>
@@ -265,12 +305,7 @@
             <label class="block text-sm font-semibold mb-1">交付时间</label>
             <input id="edit-end_date" type="date" class="w-full" />
           </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1">模具工艺</label>
-            <select id="edit-process_id" class="w-full">
-              <option value="">请选择</option>
-            </select>
-          </div>
+
           <div>
             <label class="block text-sm font-semibold mb-1">模具费是否返还</label>
             <select id="edit-refund_yes_no" class="w-full">
@@ -278,18 +313,44 @@
               <option value="是">是</option>
             </select>
           </div>
+
           <div>
             <label class="block text-sm font-semibold mb-1">模具费返还方式</label>
             <select id="edit-refund_method_id" class="w-full">
               <option value="">请选择</option>
             </select>
           </div>
-          <div class="md:col-span-1 lg:col-span-3">
+
+          <!-- 两个金额 + 是否开票 -->
+          <div>
+            <label class="block text-sm font-semibold mb-1">预付款金额（元）</label>
+            <input id="edit-advance_amount" type="number" step="0.01" class="w-full" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">余款未付金额（元）</label>
+            <input id="edit-balance_unpaid" type="number" step="0.01" class="w-full" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">是否开票</label>
+            <select id="edit-is_invoiced" class="w-full">
+              <option value="0">否</option>
+              <option value="1">是</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-1 lg:col-span-4">
             <label class="block text-sm font-semibold mb-1">备注</label>
             <textarea id="edit-remark" class="w-full"></textarea>
           </div>
+
+          <div class="md:col-span-1 lg:col-span-4">
+            <label class="block text-sm font-semibold mb-1">物料编码（可编辑）</label>
+            <div id="edit-material-chips" class="mt-1"></div>
+            <div class="text-xs text-gray-500 mt-1">如需修改物料，请在主表中使用“物料编码”输入并保存后再编辑</div>
+          </div>
         </div>
-        <div class="flex items-center gap-3">
+
+        <div class="flex items-center gap-3 mt-3">
           <button type="button" class="px-5 py-2 rounded bg-primary text-white hover:bg-blue-700 transition" onclick="submitEdit()">保存修改</button>
           <button type="button" class="px-4 py-2 rounded border" onclick="closeEdit()">取消</button>
         </div>
@@ -298,269 +359,277 @@
   </div>
 
   <script>
-    // ===== 工具 =====
-    const debounce = (fn, delay=300) => { let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), delay); } };
+    // ------------ 工具函数 ------------
     const $ = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
-    const toast = (msg) => alert(msg);
+    const debounce = (fn, d=300) => { let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), d); }; };
+    const toast = (m)=> alert(m);
     function logout(){ location.href='/login.html'; }
 
-    // ===== 字典：返还方式 + 工艺（见后端字典接口） =====
+    // ------------ 全局变量 ------------
+    const materialSet = new Set();
+    let invAbort;
+    let fileList = [];
+
+    // ------------ 字典加载 ------------
     async function loadDictionaries(){
       try{
-        const r = await fetch('/api/mold/dictionary/refund_methods');
-        const data = r.ok ? await r.json() : [];
+        const r1 = await fetch('/api/mold/dictionary/refund_methods');
+        const refunds = r1.ok ? await r1.json() : [];
         const sel = $('#refund_method_id'); sel.innerHTML = '<option value="">（选择“是否返还”为“是”后可选）</option>';
-        data.forEach(x=> sel.insertAdjacentHTML('beforeend', `<option value="${x.id}">${x.name||''}</option>`));
         const esel = $('#edit-refund_method_id'); esel.innerHTML = '<option value="">请选择</option>';
-        data.forEach(x=> esel.insertAdjacentHTML('beforeend', `<option value="${x.id}">${x.name||''}</option>`));
-      }catch(e){ console.error(e); }
+        refunds.forEach(x=> { sel.insertAdjacentHTML('beforeend', `<option value="${x.id}">${x.name||''}</option>`); esel.insertAdjacentHTML('beforeend', `<option value="${x.id}">${x.name||''}</option>`); });
 
-      try{
-        const r = await fetch('/api/mold/dictionary/process_methods');
-        const data = r.ok ? await r.json() : [];
-        const sel = $('#process_id'); sel.innerHTML = '<option value="">请选择</option>';
-        data.forEach(x=> sel.insertAdjacentHTML('beforeend', `<option value="${x.id}">${x.name||''}</option>`));
-        const esel = $('#edit-process_id'); esel.innerHTML = '<option value="">请选择</option>';
-        data.forEach(x=> esel.insertAdjacentHTML('beforeend', `<option value="${x.id}">${x.name||''}</option>`));
-      }catch(e){ console.error(e); }
+        const r2 = await fetch('/api/mold/dictionary/process_methods');
+        const procs = r2.ok ? await r2.json() : [];
+        const psel = $('#process_id'); psel.innerHTML = '<option value="">请选择</option>';
+        const epsel = $('#edit-process_id'); epsel.innerHTML = '<option value="">请选择</option>';
+        procs.forEach(x=> { psel.insertAdjacentHTML('beforeend', `<option value="${x.id}">${x.name||''}</option>`); epsel.insertAdjacentHTML('beforeend', `<option value="${x.id}">${x.name||''}</option>`); });
+      }catch(e){
+        console.error('加载字典失败', e);
+      }
     }
 
-    // ===== “是否返还”联动 =====
+    // ------------ 返还联动 ------------
     function bindRefundToggle(){
-      const yesNo = $('#refund_yes_no');
-      const sel = $('#refund_method_id');
-      const update = ()=>{
-        const enable = yesNo.value==='是';
-        sel.disabled = !enable;
-        if(!enable) sel.value='';
-      };
-      yesNo.addEventListener('change', update);
-      update();
+      const yesNo = $('#refund_yes_no'), sel = $('#refund_method_id');
+      const update = ()=>{ const enable = (yesNo.value === '是'); sel.disabled = !enable; if(!enable) sel.value = ''; };
+      yesNo.addEventListener('change', update); update();
     }
     function bindEditRefundToggle(){
-      const yesNo = $('#edit-refund_yes_no');
-      const sel = $('#edit-refund_method_id');
-      const update = ()=>{
-        const enable = yesNo.value==='是';
-        sel.disabled = !enable;
-        if(!enable) sel.value='';
-      };
-      yesNo.addEventListener('change', update);
-      update();
+      const yesNo = $('#edit-refund_yes_no'), sel = $('#edit-refund_method_id');
+      const update = ()=>{ const enable = (yesNo.value === '是'); sel.disabled = !enable; if(!enable) sel.value = ''; };
+      yesNo.addEventListener('change', update); update();
     }
 
-    // ===== 供应商模糊搜索 =====
+    // ------------ 供应商模糊搜索 ------------
     function bindSupplierSearch({inputId, hiddenId, listId}){
-      const ipt = $(inputId), list = $(listId);
+      const ipt = $(inputId), hid = $(hiddenId), list = $(listId);
       const onInput = debounce(async ()=>{
-        const kw = ipt.value.trim();
-        if(!kw){ list.classList.add('hidden'); list.innerHTML=''; return; }
-        const r = await fetch('/api/mold/supplier/search?kw='+encodeURIComponent(kw));
-        const data = await r.json();
-        if(!Array.isArray(data) || !data.length){ list.classList.add('hidden'); list.innerHTML=''; return; }
-        list.innerHTML = data.slice(0, 50).map(x=> `<div data-id="${x.id}" data-name="${x.supplier_name}">${x.supplier_name}</div>`).join('');
-        list.classList.remove('hidden');
-      }, 300);
+        const kw = ipt.value.trim(); if(!kw){ list.classList.add('hidden'); list.innerHTML=''; return; }
+        try{
+          const r = await fetch('/api/mold/supplier/search?kw=' + encodeURIComponent(kw));
+          const data = await r.json();
+          if(!Array.isArray(data) || !data.length){ list.classList.add('hidden'); list.innerHTML=''; return; }
+          list.innerHTML = data.slice(0,50).map(x=> `<div data-id="${x.id}" data-name="${x.supplier_name}">${x.supplier_name}</div>`).join('');
+          list.classList.remove('hidden');
+        }catch(e){ console.error(e); }
+      }, 260);
       ipt.addEventListener('input', onInput);
       ipt.addEventListener('focus', onInput);
       list.addEventListener('click', e=>{
-        const div = e.target.closest('div[data-id]');
-        if(!div) return;
-        ipt.value = div.getAttribute('data-name');
-        $(hiddenId).value = div.getAttribute('data-id');
-        list.classList.add('hidden');
+        const div = e.target.closest('div[data-id]'); if(!div) return;
+        ipt.value = div.getAttribute('data-name'); hid.value = div.getAttribute('data-id'); list.classList.add('hidden');
       });
-      document.addEventListener('click', e=>{
-        if(!list.contains(e.target) && e.target!==ipt) list.classList.add('hidden');
+      document.addEventListener('click', e=> {
+        if(!list.contains(e.target) && e.target !== ipt) list.classList.add('hidden');
       });
     }
 
-    // ===== 物料模糊搜索 + 多选 chips =====
-    const materialSet = new Set();
-    let invAbort;
-    const matHint = $('#material-hint');
-
-    function renderMaterials(){
-      const wrap = $('#material-chips');
+    // ------------ 物料搜索 & chips ------------
+    function renderMaterials(target='#material-chips'){
+      const wrap = document.querySelector(target);
+      if(!wrap) return;
       const frag = document.createDocumentFragment();
       materialSet.forEach(code=>{
         const el = document.createElement('span');
-        el.className='chip';
+        el.className = 'chip';
         el.innerHTML = `${code}<span class="x" title="移除" data-code="${code}">✕</span>`;
         frag.appendChild(el);
       });
       wrap.innerHTML = '';
       wrap.appendChild(frag);
       wrap.onclick = (e)=>{
-        const x = e.target.closest('.x');
-        if(x){ materialSet.delete(x.dataset.code); renderMaterials(); updateMatHint(); }
+        const x = e.target.closest('.x'); if(!x) return;
+        materialSet.delete(x.dataset.code); renderMaterials(); updateMatHint();
       };
     }
-    function updateMatHint(){ matHint.textContent = materialSet.size ? `已选择 ${materialSet.size} 个物料` : ''; }
+    function updateMatHint(){ const el = $('#material-hint'); if(el) el.textContent = materialSet.size ? `已选择 ${materialSet.size} 个物料` : ''; }
 
     function bindInventorySearch(){
       const ipt = $('#material-input'), list = $('#material-list');
       const doSearch = debounce(async ()=>{
-        const kw = ipt.value.trim();
-        if(!kw){ list.classList.add('hidden'); list.innerHTML=''; return; }
+        const kw = ipt.value.trim(); if(!kw){ list.classList.add('hidden'); list.innerHTML=''; return; }
         if(invAbort) invAbort.abort();
         invAbort = new AbortController();
         try{
-          const r = await fetch('/api/mold/inventory/search?kw='+encodeURIComponent(kw), {signal: invAbort.signal});
+          const r = await fetch('/api/mold/inventory/search?kw='+encodeURIComponent(kw), { signal: invAbort.signal });
           const data = await r.json();
           if(!Array.isArray(data) || !data.length){ list.classList.add('hidden'); list.innerHTML=''; return; }
-          list.innerHTML = data.slice(0, 100).map(x=> `<div data-code="${x.cInvCode}" title="${x.cInvName||''}">${x.cInvCode} ${x.cInvName||''}</div>`).join('');
+          list.innerHTML = data.slice(0,100).map(x=> `<div data-code="${x.cInvCode}" title="${x.cInvName||''}">${x.cInvCode} ${x.cInvName||''}</div>`).join('');
           list.classList.remove('hidden');
-        }catch(e){ if(e.name!=='AbortError'){ console.error(e); } }
+        }catch(e){ if(e.name !== 'AbortError') console.error(e); }
       }, 250);
+
       ipt.addEventListener('input', doSearch);
       ipt.addEventListener('keydown', e=>{
-        if(e.key==='Enter'){
-          e.preventDefault();
-          const v = ipt.value.trim();
-          if(v){ materialSet.add(v); renderMaterials(); updateMatHint(); ipt.value=''; list.classList.add('hidden'); }
-        }
+        if(e.key === 'Enter'){ e.preventDefault(); const v = ipt.value.trim(); if(v){ materialSet.add(v); renderMaterials(); updateMatHint(); ipt.value=''; list.classList.add('hidden'); } }
       });
+
       list.addEventListener('click', e=>{
-        const div = e.target.closest('div[data-code]');
-        if(!div) return;
-        materialSet.add(div.getAttribute('data-code'));
-        renderMaterials(); updateMatHint(); ipt.value=''; list.classList.add('hidden');
+        const div = e.target.closest('div[data-code]'); if(!div) return;
+        materialSet.add(div.getAttribute('data-code')); renderMaterials(); updateMatHint(); ipt.value=''; list.classList.add('hidden');
       });
+
       document.addEventListener('click', e=>{
-        if(!list.contains(e.target) && e.target!==ipt) list.classList.add('hidden');
+        if(!list.contains(e.target) && e.target !== ipt) list.classList.add('hidden');
       });
     }
 
-    // ===== 附件选择 =====
-    let fileList = [];
+    // ------------ 附件选择 ------------
     const fileInput = $('#file-input'), fileListDiv = $('#file-list');
-    $('#upload-btn').addEventListener('click', ()=>{ fileInput.value=""; fileInput.click(); });
+    $('#upload-btn').addEventListener('click', ()=>{ fileInput.value=''; fileInput.click(); });
     fileInput.addEventListener('change', function(){
       for(const f of this.files){
-        const i = fileList.findIndex(x=> x.name===f.name && x.size===f.size);
-        i>=0? fileList[i]=f: fileList.push(f);
+        const i = fileList.findIndex(x=> x.name === f.name && x.size === f.size);
+        if(i >= 0) fileList[i] = f; else fileList.push(f);
       }
       renderFileList();
     });
     function renderFileList(){
-      if(fileList.length===0){ fileListDiv.innerHTML=""; return; }
-      let html='<div class="text-sm mb-1">已选择附件：</div><ul class="list-disc pl-5">';
-      fileList.forEach((f,i)=> html+=`<li>${f.name} <span class="text-blue-600 cursor-pointer" onclick="removeFile(${i})">移除</span></li>`);
-      html+='</ul>'; fileListDiv.innerHTML=html;
+      if(!fileListDiv) return;
+      if(fileList.length === 0){ fileListDiv.innerHTML = ''; return; }
+      let html = '<div class="text-sm mb-1">已选择附件：</div><ul class="list-disc pl-5">';
+      fileList.forEach((f,i)=> html += `<li>${f.name} <span class="text-blue-600 cursor-pointer" onclick="removeFile(${i})">移除</span></li>`);
+      html += '</ul>'; fileListDiv.innerHTML = html;
     }
     window.removeFile = (i)=>{ fileList.splice(i,1); renderFileList(); }
 
-    // ===== 提交新增 =====
+    // ------------ 提交新增（带防抖/错误捕获） ------------
     $('#mold-period-form').addEventListener('submit', async (e)=>{
       e.preventDefault();
-      const fd = new FormData();
-      const product_name = $('#product_name').value.trim();
-      const casting_supplier_id = $('#casting-supplier-id').value.trim();
-      const mold_supplier_id = $('#mold-supplier-id').value.trim();
-      const start_date = $('#start_date').value || '';
-      const end_date = $('#end_date').value || '';
-      const amount = $('#amount').value || '';
-      const company = $('#company').value || '';
-      const process_id = $('#process_id').value || '';
-      const remark = $('#remark').value.trim();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true; submitBtn.textContent = '保存中...';
+      try{
+        const fd = new FormData();
+        const product_name = $('#product_name').value.trim();
+        const casting_supplier_id = $('#casting-supplier-id').value.trim();
+        const mold_supplier_id = $('#mold-supplier-id').value.trim();
+        const start_date = $('#start_date').value || '';
+        const end_date = $('#end_date').value || '';
+        const amount = $('#amount').value || '';
+        const company = $('#company').value || '';
+        const process_id = $('#process_id').value || '';
+        const remark = $('#remark').value.trim();
+        const advance_amount = $('#advance_amount').value;
+        const balance_unpaid = $('#balance_unpaid').value;
+        const is_invoiced = $('#is_invoiced').value;
 
-      if(!product_name){ toast('请填写模具产品名称'); return; }
-      if(!casting_supplier_id){ toast('请选择铸造供应商'); return; }
-      if(!mold_supplier_id){ toast('请选择模具供应商'); return; }
+        if(!product_name){ toast('请填写模具产品名称'); return; }
+        if(!casting_supplier_id){ toast('请选择铸造供应商'); return; }
+        if(!mold_supplier_id){ toast('请选择模具供应商'); return; }
 
-      fd.append('product_name', product_name);
-      fd.append('casting_supplier_id', casting_supplier_id);
-      fd.append('mold_supplier_id', mold_supplier_id);
-      if(amount) fd.append('amount', amount);
-      if(start_date) fd.append('start_date', start_date);
-      if(end_date) fd.append('end_date', end_date);
-      if(company) fd.append('company', company);
-      if(process_id) fd.append('process_id', process_id);
-      if(remark) fd.append('remark', remark);
+        fd.append('product_name', product_name);
+        fd.append('casting_supplier_id', casting_supplier_id);
+        fd.append('mold_supplier_id', mold_supplier_id);
+        if(amount) fd.append('amount', amount);
+        if(start_date) fd.append('start_date', start_date);
+        if(end_date) fd.append('end_date', end_date);
+        if(company) fd.append('company', company);
+        if(process_id) fd.append('process_id', process_id);
+        if(remark) fd.append('remark', remark);
 
-      if($('#refund_yes_no').value === '是'){
-        const refund_method_id = $('#refund_method_id').value || '';
-        if(refund_method_id) fd.append('refund_method_id', refund_method_id);
+        // 新增字段
+        if(advance_amount !== '') fd.append('advance_amount', advance_amount);
+        if(balance_unpaid !== '') fd.append('balance_unpaid', balance_unpaid);
+        fd.append('is_invoiced', is_invoiced);
+
+        if($('#refund_yes_no').value === '是'){
+          const refund_method_id = $('#refund_method_id').value || '';
+          if(refund_method_id) fd.append('refund_method_id', refund_method_id);
+        }
+
+        const arr = Array.from(materialSet);
+        if(arr.length) fd.append('material_codes', JSON.stringify(arr));
+
+        fileList.forEach(f => fd.append('attachments', f, f.name));
+
+        const r = await fetch('/api/mold/period', { method: 'POST', body: fd });
+        let res;
+        try { res = await r.json(); } catch(parseErr){
+          const text = await r.text().catch(()=>'(无法读取)');
+          throw new Error(`服务器返回非 JSON (status=${r.status})：${text}`);
+        }
+        if(!res || res.success === false){ throw new Error(res?.msg || `保存失败 (status ${r.status})`); }
+        toast('保存成功');
+        resetForm(); loadList();
+      }catch(err){
+        console.error('保存异常：', err);
+        toast(err.message || '保存时发生异常');
+      }finally{
+        submitBtn.disabled = false; submitBtn.textContent = '保存';
       }
-
-      const arr = Array.from(materialSet);
-      if(arr.length) fd.append('material_codes', JSON.stringify(arr));
-
-      fileList.forEach(f=> fd.append('attachments', f, f.name));
-
-      const r = await fetch('/api/mold/period', { method:'POST', body: fd });
-      const data = await r.json();
-      if(!data || data.success===false){ toast(data?.msg || '保存失败'); return; }
-      toast('保存成功');
-      resetForm();
-      loadList();
     });
 
+    // ------------ 重置表单 ------------
     function resetForm(){
-      $('#product_name').value='';
-      $('#casting-supplier').value=''; $('#casting-supplier-id').value='';
+      $('#product_name').value=''; $('#casting-supplier').value=''; $('#casting-supplier-id').value='';
       $('#mold-supplier').value=''; $('#mold-supplier-id').value='';
-      $('#start_date').value=''; $('#end_date').value='';
-      $('#amount').value=''; $('#company').value=''; $('#process_id').value='';
-      $('#refund_yes_no').value='否'; $('#refund_method_id').value=''; $('#refund_method_id').disabled=true;
-      $('#remark').value='';
+      $('#start_date').value=''; $('#end_date').value=''; $('#amount').value='';
+      $('#company').value=''; $('#process_id').value=''; $('#refund_yes_no').value='否';
+      $('#refund_method_id').value=''; $('#refund_method_id').disabled = true;
+      $('#remark').value=''; $('#is_invoiced').value='0'; $('#advance_amount').value=''; $('#balance_unpaid').value='';
       materialSet.clear(); renderMaterials(); updateMatHint();
       fileList = []; renderFileList();
     }
 
-    // ===== 列表 =====
-    let cachedRows = [];
+    // ------------ 列表加载 ------------
     async function loadList(){
-      const r = await fetch('/api/mold/period/list');
-      const json = await r.json();
-      const rows = json?.data || [];
-      cachedRows = rows;
-      const tb = $('#list-body'); tb.innerHTML='';
-      const frag = document.createDocumentFragment();
-      for(const x of rows){
-        const refund = (x.refund||'').trim();
-        const isRefund = refund ? '是' : '否';
-        const tr = document.createElement('tr');
-        tr.className='border-b';
-        tr.innerHTML = `
-          <td class="px-3 py-2">${x.mold_id||''}</td>
-          <td class="px-3 py-2">${x.product_name||''}</td>
-          <td class="px-3 py-2">${x.casting_supplier||''}</td>
-          <td class="px-3 py-2">${x.mold_supplier||''}</td>
-          <td class="px-3 py-2">${x.materials||''}</td>
-          <td class="px-3 py-2">${x.start_date||''}</td>
-          <td class="px-3 py-2">${x.end_date||''}</td>
-          <td class="px-3 py-2">${x.amount??''}</td>
-          <td class="px-3 py-2">${isRefund}</td>
-          <td class="px-3 py-2">${refund||''}</td>
-          <td class="px-3 py-2">${x.process||''}</td>
-          <td class="px-3 py-2">${x.company||''}</td>
-          <td class="px-3 py-2">${x.remark||''}</td>
-          <td class="px-3 py-2 whitespace-nowrap">
-            <button class="text-blue-600 mr-3" onclick="openEdit(${x.mold_id})">编辑</button>
-            <button class="text-red-600 mr-3" onclick="delRow(${x.mold_id})">删除</button>
-            <button class="text-green-700" onclick="downloadAttachments(${x.mold_id}, this)">下载附件</button>
-          </td>`;
-        frag.appendChild(tr);
+      try{
+        const r = await fetch('/api/mold/period/list');
+        const json = await r.json();
+        const rows = json?.data || [];
+        const tb = $('#list-body'); tb.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        for(const x of rows){
+          const refund = (x.refund || '').trim();
+          const isRefund = refund ? '是' : '否';
+          const invoicedText = (x.is_invoiced===1 || x.is_invoiced==='1' || x.is_invoiced===true) ? '是' : '否';
+          const tr = document.createElement('tr'); tr.className='border-b';
+          tr.innerHTML = `
+            <td class="px-3 py-2">${x.mold_id||''}</td>
+            <td class="px-3 py-2">${x.product_name||''}</td>
+            <td class="px-3 py-2">${x.casting_supplier||''}</td>
+            <td class="px-3 py-2">${x.mold_supplier||''}</td>
+            <td class="px-3 py-2">${x.materials||''}</td>
+            <td class="px-3 py-2">${x.start_date||''}</td>
+            <td class="px-3 py-2">${x.end_date||''}</td>
+            <td class="px-3 py-2">${x.amount ?? ''}</td>
+            <td class="px-3 py-2">${x.advance_amount ?? ''}</td>
+            <td class="px-3 py-2">${x.balance_unpaid ?? ''}</td>
+            <td class="px-3 py-2">${invoicedText}</td>
+            <td class="px-3 py-2">${isRefund}</td>
+            <td class="px-3 py-2">${refund||''}</td>
+            <td class="px-3 py-2">${x.process||''}</td>
+            <td class="px-3 py-2">${x.company||''}</td>
+            <td class="px-3 py-2">${x.remark||''}</td>
+            <td class="px-3 py-2 whitespace-nowrap">
+              <button class="text-blue-600 mr-3" onclick="openEdit(${x.mold_id})">编辑</button>
+              <button class="text-red-600 mr-3" onclick="delRow(${x.mold_id})">删除</button>
+              <button class="text-green-700" onclick="downloadAttachments(${x.mold_id}, this)">下载附件</button>
+            </td>`;
+          frag.appendChild(tr);
+        }
+        tb.appendChild(frag);
+      }catch(e){
+        console.error('加载列表失败', e);
       }
-      tb.appendChild(frag);
     }
 
     async function delRow(id){
       if(!confirm('确认删除该台账？（存在调拨记录将无法删除）')) return;
-      const r = await fetch('/api/mold/period/delete/'+id, {method:'POST'});
-      const data = await r.json();
-      if(data?.success){ toast('删除成功'); loadList(); }
-      else toast(data?.msg || '删除失败');
+      try{
+        const r = await fetch('/api/mold/period/delete/'+id, { method: 'POST' });
+        const d = await r.json();
+        if(d?.success){ toast('删除成功'); loadList(); } else { toast(d?.msg || '删除失败'); }
+      }catch(e){ console.error(e); toast('删除异常'); }
     }
 
-    // ===== 下载附件 =====
+    // ------------ 附件下载 ------------
     async function downloadAttachments(moldId, btn){
       try{
         btn.disabled = true;
-        const r = await fetch('/api/mold/period/'+moldId);
+        const r = await fetch('/api/mold/period/' + moldId);
         if(!r.ok){ toast('获取附件失败'); return; }
         const d = await r.json();
         const attachments = Array.isArray(d.attachments) ? d.attachments : [];
@@ -573,36 +642,74 @@
           a.click();
           a.remove();
         }
-      }catch(e){
-        console.error(e); toast('下载失败');
-      }finally{
-        btn.disabled = false;
-      }
+      }catch(e){ console.error(e); toast('下载失败'); }
+      finally{ btn.disabled = false; }
     }
-    window.downloadAttachments = downloadAttachments;
 
-    // ===== 编辑 =====
+    // ------------ 编辑 ------------
+    function renderEditMaterials(list){
+      // 在编辑 modal 中显示物料 chips（不可直接编辑主表物料逻辑简单处理）
+      const wrap = $('#edit-material-chips');
+      if(!wrap) return;
+      wrap.innerHTML = '';
+      if(!Array.isArray(list) || list.length===0) return;
+      const frag = document.createDocumentFragment();
+      list.forEach(m=>{
+        const el = document.createElement('span'); el.className='chip'; el.textContent = m.cInvCode || m.cInvName || m;
+        frag.appendChild(el);
+      });
+      wrap.appendChild(frag);
+    }
+
     async function openEdit(id){
-      const r = await fetch('/api/mold/period/'+id);
-      if(!r.ok){ toast('获取详情失败'); return; }
-      const d = await r.json();
-      $('#edit-id').value = d.mold_id;
-      $('#edit-product_name').value = d.product_name||'';
-      $('#edit-amount').value = d.amount??'';
-      $('#edit-company').value = d.company||'';
-      $('#edit-start_date').value = (d.start_date||'').substring(0,10);
-      $('#edit-end_date').value = (d.end_date||'').substring(0,10);
-      $('#edit-remark').value = d.remark||'';
-      $('#edit-process_id').value = d.process_id||'';
+      try{
+        const r = await fetch('/api/mold/period/' + id);
+        if(!r.ok){ toast('获取详情失败'); return; }
+        const d = await r.json();
+        $('#edit-id').value = d.mold_id;
+        $('#edit-product_name').value = d.product_name || '';
+        $('#edit-amount').value = d.amount ?? '';
+        $('#edit-company').value = d.company || '';
+        $('#edit-start_date').value = (d.start_date||'').substring(0,10);
+        $('#edit-end_date').value = (d.end_date||'').substring(0,10);
+        $('#edit-remark').value = d.remark || '';
+        $('#edit-process_id').value = d.process_id || '';
 
-      const hasRefund = !!(d.refund_method_id || (d.refund_method_name||'').trim() || (d.refund||'').trim());
-      $('#edit-refund_yes_no').value = hasRefund ? '是' : '否';
-      $('#edit-refund_method_id').value = d.refund_method_id || '';
-      bindEditRefundToggle();
+        // 两个金额 & 是否开票
+        $('#edit-advance_amount').value = d.advance_amount ?? '';
+        $('#edit-balance_unpaid').value = d.balance_unpaid ?? '';
+        const invVal = (d.is_invoiced===1 || d.is_invoiced==='1' || d.is_invoiced===true) ? '1' : '0';
+        $('#edit-is_invoiced').value = invVal;
 
-      $('#edit-modal').classList.remove('hidden');
+        const hasRefund = !!(d.refund_method_id || (d.refund_method_name||'').trim() || (d.refund||'').trim());
+        $('#edit-refund_yes_no').value = hasRefund ? '是' : '否';
+        $('#edit-refund_method_id').value = d.refund_method_id || '';
+        bindEditRefundToggle();
+
+        // 回填物料 chips（后端应返回 materials 数组）
+        if(Array.isArray(d.materials) && d.materials.length){
+          materialSet.clear();
+          for(const m of d.materials){ materialSet.add(m.cInvCode || m); }
+          renderMaterials(); renderEditMaterialChips();
+        }else{
+          // 清理编辑模态的独立显示区
+          materialSet.clear(); renderMaterials(); renderEditMaterialChips();
+        }
+
+        // 打开 modal
+        $('#edit-modal').classList.remove('hidden'); $('#edit-modal').setAttribute('aria-hidden','false');
+      }catch(e){ console.error('编辑打开失败', e); toast('获取详情异常'); }
     }
-    function closeEdit(){ $('#edit-modal').classList.add('hidden'); }
+
+    function renderEditMaterialChips(){
+      // 在两个位置都渲染：主表位置（#material-chips）和编辑区域（#edit-material-chips）
+      renderMaterials('#material-chips');
+      renderMaterials('#edit-material-chips');
+    }
+
+    function closeEdit(){
+      $('#edit-modal').classList.add('hidden'); $('#edit-modal').setAttribute('aria-hidden','true');
+    }
 
     async function submitEdit(){
       const id = $('#edit-id').value;
@@ -613,37 +720,34 @@
         start_date: $('#edit-start_date').value || null,
         end_date: $('#edit-end_date').value || null,
         remark: $('#edit-remark').value.trim(),
-        process_id: $('#edit-process_id').value || null
+        process_id: $('#edit-process_id').value || null,
+        advance_amount: $('#edit-advance_amount').value || null,
+        balance_unpaid: $('#edit-balance_unpaid').value || null,
+        is_invoiced: $('#edit-is_invoiced').value
       };
       if($('#edit-refund_yes_no').value === '是'){
         payload.refund_method_id = $('#edit-refund_method_id').value ? parseInt($('#edit-refund_method_id').value,10) : null;
-      }else{
-        payload.refund_method_id = null;
-      }
+      }else payload.refund_method_id = null;
 
       try{
-        const r = await fetch('/api/mold/period/'+id, {
-          method:'PUT',
-          headers:{'Content-Type':'application/json'},
+        const r = await fetch('/api/mold/period/' + id, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(payload)
         });
-        if(!r.ok){
-          // 兼容旧接口(若有)可在此补偿
-        }
+        const d = await r.json();
+        if(!d || d.success === false){ throw new Error(d?.msg || '修改失败'); }
         toast('修改成功');
-        closeEdit();
-        loadList();
-      }catch(e){
-        console.error(e); toast('修改失败');
-      }
+        closeEdit(); loadList();
+      }catch(e){ console.error('修改异常', e); toast(e.message || '修改失败'); }
     }
 
-    // ===== 初始化 =====
+    // ------------ 初始化 ------------
     (function init(){
       loadDictionaries();
       bindRefundToggle();
-      bindSupplierSearch({inputId:'#casting-supplier', hiddenId:'#casting-supplier-id', listId:'#casting-supplier-list'});
-      bindSupplierSearch({inputId:'#mold-supplier', hiddenId:'#mold-supplier-id', listId:'#mold-supplier-list'});
+      bindSupplierSearch({ inputId:'#casting-supplier', hiddenId:'#casting-supplier-id', listId:'#casting-supplier-list' });
+      bindSupplierSearch({ inputId:'#mold-supplier', hiddenId:'#mold-supplier-id', listId:'#mold-supplier-list' });
       bindInventorySearch();
       loadList();
     })();
