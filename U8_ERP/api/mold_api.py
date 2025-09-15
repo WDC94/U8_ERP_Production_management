@@ -208,14 +208,20 @@ def mold_search():
     rows = mold.list_mold_period_v2()
     if kw:
         rows = [
-            r
-            for r in rows
+            r for r in rows
             if kw in str(r.get('mold_id', '')).lower()
                or kw in (r.get('product_name', '') or '').lower()
         ]
-    # 精简返回
-    brief = [{'mold_id': r['mold_id'], 'product_name': r['product_name']} for r in rows]
+    # 精简返回，但包含前端需要的供应商名
+    brief = [{
+        'mold_id': r['mold_id'],
+        'product_name': r['product_name'],
+        'casting_supplier': r.get('casting_supplier', ''),
+        'mold_supplier': r.get('mold_supplier', '')
+    } for r in rows]
     return jsonify(brief)
+
+# ---------- 导出 ----------
 @mold_api.route('/period/export/csv', methods=['GET'])
 def period_export_csv():
     """
@@ -249,7 +255,7 @@ def period_export_csv():
     writer = csv.writer(sio)
     writer.writerow(titles)
     for r in rows:
-        writer.writerow([ (r.get(f, '') if r.get(f, '') is not None else '') for f in fields ])
+        writer.writerow([(r.get(f, '') if r.get(f, '') is not None else '') for f in fields])
 
     # 关键：以 UTF-8-SIG 编码返回，Excel 不会乱码
     data = sio.getvalue().encode('utf-8-sig')
@@ -304,3 +310,12 @@ def period_export_xlsx():
         download_name=filename,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
+# ---------- 调拨记录 ----------
+@mold_api.route('/transfer/list')
+def transfer_list():
+    mold_id = request.args.get('mold_id', '').strip()
+    if not mold_id.isdigit():
+        return jsonify({'success': False, 'msg': 'mold_id无效'}), 400
+    data = mold.list_transfer_records(int(mold_id))
+    return jsonify({'success': True, 'data': data})
